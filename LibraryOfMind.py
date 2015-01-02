@@ -1,56 +1,32 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding: utf-8 -*-
 
-import lomSQL
-import re
-import Tkinter as TK
+from parser import *
+import readline
 
-def print_help():
-    pass
-
-def check_arguments():
-    pass
-
-class BaseLOMclass():
-
-    def __init__(self):
-        pass
-    def makeARGV(self):
-        pass
-
-class tkWindow():
-    def __init__(self,name):
-        self.root = TK.Tk()
-        self.root.title(name)
-        TK.Label(text="Add or Edit record", fg="blue", font="Times 16").pack()
-        TK.Label(text="Name", width=15, anchor='w').pack(side=TK.LEFT)
-        self.ename = TK.Entry(self.root)
-        self.ename.pack(side=TK.RIGHT, expand=TK.YES, fill=TK.X)
-
-
+readline.parse_and_bind("tab: complete")
+        
 
 if __name__ == '__main__':
     
-    import getopt
     import sys
     import os
 
-    print '\n\n'
+    initialization()
+    update_last_log()
+    parser = Parser()
 
-    operation = None
+    while True:
+        try:
 
-    try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:],'aesh')
-    except getopt.GetoptError:
-        print_help()
+            patern = raw_input(options.get('lom','prompt'))
+            
+            if patern.lower() in ('q', 'exit', 'quit'):
+                print 'Thanks for used this aplication'
+                exit(0)
+            else:
+                if patern != "":
+                    print parser.checkPatern(patern)
 
-    for opt, arg in opts:
-        if opt in '-a':
-            print 'add record'
-            print args
-
-        elif opt in '-e':
-            print 'edit record'
-
-        elif opt in '-s':
-            print 'search record'
+        except (KeyboardInterrupt, EOFError):
+            print '\nIf you want exit this program \nyou mast write \'quit\' or \'exit\' or \'q\''

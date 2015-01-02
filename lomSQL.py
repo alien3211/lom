@@ -16,7 +16,7 @@ class lomsql:
         expr = operation.split()[0]
         if (expr not in "CREATE") or (expr not in "INSERT") or (expr not in "DROP") or (expr not in "UPDATE"):
             conn = sqlite3.connect(self.name)
-            table = conn.execute(operation)
+            table = conn.execute(operation).fetchall()
             conn.close()
             return table
     
