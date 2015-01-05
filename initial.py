@@ -3,23 +3,38 @@
 
 from os import getenv
 import ConfigParser
-from Tcolors import replace_colour, re_replace_colour
+from Tcolors import replace_colour, re_replace_colour, replace_list
 from lomSQL import lomsql 
+from tree import Tree
+
+(_ROOT, _DEPTH, _BREADTH) = range(3)
+
+
+class Basic_date(object):
+
+    def __init__(self):
+        self.types        = []
+        self.keys         = []
+        self.search       = []
+        self.news_waiting = []
+        self.news_added   = []
+        self.d_current    = []
+        self.last_log     = None
+
+    def update_last_log(self):
+
+        self.last_log = databases.get('SELECT last_log FROM USERS WHERE user=\'' + options.get('lom','user') + '\';')[0][0]
+        databases.add('UPDATE USERS SET last_log = datetime(\'now\') where user = \'' +  options.get('lom','user') + '\';')
+
 
 # Global Variable
+tree = Tree()
 options = ConfigParser.RawConfigParser()
 options.read('/home/' + getenv('USER') + '/.lomrc')
 
 databases = lomsql()
 
-types        = []
-access       = []
-keys         = []
-search       = []
-news_waiting = []
-news_added   = []
-last_log     = []
-
+variables = Basic_date()
 
 def prompt():
     r_prompt = replace_colour(options.get('lom','prompt')).replace('\'','').replace('"', '')
@@ -32,14 +47,14 @@ def initialization():
         databases.add('INSERT INTO USERS(user, id_access) VALUES ("' + options.get('lom','user') + '", 3)')
         print "Current user are exist"
         
-    last_log = databases.get('SELECT last_log FROM USERS WHERE user=\'' + options.get('lom','user') + '\';')[0][0]
-    news_waiting = databases.get('select * from WAITING w where w.data_a > \'' + last_log + '\';')
-    news_added = databases.get('select * from LIBRARY l where l.data_a > \'' + last_log + '\';')
+    variables.last_log = databases.get('SELECT last_log FROM USERS WHERE user=\'' + options.get('lom','user') + '\';')[0][0]
+    variables.news_waiting = databases.get('select * from WAITING w where w.data_a > \'' + variables.last_log + '\';')
+    variables.news_added = databases.get('select * from LIBRARY l where l.data_a > \'' + variables.last_log + '\';')
 
-    init_text += "\nLast logged (<blue>" + last_log + "<end>)\n"
+    init_text += "\nLast logged (<blue>" + variables.last_log + "<end>)\n"
 
-    if len(news_waiting) != 0 or len(news_added) != 0:
-        init_text += "Since last logged add <green>" + str(len(news_waiting)) + "<end> waiting and <green>" + str(len(news_added)) + "<end> verified record/s to library\n"
+    if len(variables.news_waiting) != 0 or len(variables.news_added) != 0:
+        init_text += "Since last logged add <green>" + str(len(variables.news_waiting)) + "<end> waiting and <green>" + str(len(variables.news_added)) + "<end> verified record/s to library\n"
     else:
         init_text += "Since last logged not added anything\n"
 
@@ -47,9 +62,6 @@ def initialization():
     print replace_colour(init_text)
 
 
-def update_last_log():
-
-    databases.add('UPDATE USERS SET last_log = datetime(\'now\') where user = \'' +  options.get('lom','user') + '\';')
     
 
 

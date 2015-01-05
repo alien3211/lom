@@ -13,7 +13,7 @@ if __name__ == '__main__':
     import os
 
     initialization()
-    update_last_log()
+    variables.update_last_log()
     parser = Parser()
 
     while True:
