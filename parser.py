@@ -22,7 +22,7 @@ class Parser(object):
         elif command in ['search', 's']:
             return self.search(rest[::-1])
         elif command in ['add','a']:
-            return self.add_record(rest[::-1])
+            return self.add_record()
         elif command in ['update', 'u']:
             return self.update_record(rest[::-1])
         elif command in ['type']:
@@ -59,8 +59,14 @@ class Parser(object):
     def search(self, option):
         return "search", ' '.join(option)
 
-    def add_record(self, option):
-        return "add record", ' '.join(option)
+    def add_record(self):
+        window = MainWindow(check_all_paramiter_to_add)
+        variables.types = databases.get('SELECT type FROM TYPES');
+        window.add_type([ x[0] for x in variables.types])
+        variables.keys = databases.get('SELECT key FROM KEYS');
+        window.add_key([ x[0] for x in variables.keys])
+        window.main_loop()
+        return ""
 
     def update_record(self, option):
         return "set record", ' '.join(option)
@@ -112,7 +118,7 @@ class Parser(object):
         
         print ""
         if len(option) == 0:
-            variables.keys = databases.get('SELECT key, id_lib FROM KEYS');
+            variables.keys = databases.get('SELECT key, id_lib FROM KEYS;');
             for i, key in enumerate(variables.keys):
                 print replace_colour('<green>{:<5}<end>{:15}<end>'.format(i+1, key[0]))
         elif option[0] == '-p':
@@ -124,7 +130,7 @@ class Parser(object):
                     if len(variables.keys) >= number:
                         name_type = variables.keys[(number - 1)][1]
                     else:
-                        return replace_colour('\t<red>Please enter a number beetween <cyan><1,' + str(len(variables.types)) + '><end>\n')
+                        return replace_colour('\t<red>Please enter a number beetween <cyan><1,' + str(len(variables.keys)) + '><end>\n')
                         
                 else:
                     for key in veriables.keys():
@@ -224,3 +230,33 @@ class Parser(object):
 
         
 
+def check_all_paramiter_to_add(window):
+    
+    record = window.get_data()
+    all_name = databases.get('select name from WAITING;')[0]
+    all_name += databases.get('select name from LIBRARY;')[0]
+
+    for row in all_name:
+        if record[0].lower() == row.lower():
+            return window.print_error_message("Name alredy exist")
+
+    b_add = True
+    if record[2] != "":
+        all_type = databases.get("select type from TYPES;")
+
+        for row in all_type:
+            if row[0].lower() == record[1].lower():
+                b_add = False
+                break
+
+        if b_add == True:
+            parent = databases.get("select id_type from TYPES where type='" + record[2] + "';")[0][0]
+            databases.add("INSERT INTO TYPES(type, id_parent) VALUES ('" + record[1] + "',"+ str(parent) + ");")
+
+    id_type = databases.get("select id_type from TYPES where type='" + record[1] + "';")[0][0]
+
+    databases.add("INSERT INTO WAITING(name,id_type,description,key,name_a) VALUES ('" + record[0] + "', "+ str(id_type)+ ", '" + record[3].replace("'",'"') + "', '" + record[4] + "', '" + getenv('USER') +"');")
+    
+
+    window.gtk_quit()
+    window.destroy()

@@ -69,3 +69,6 @@ SELECT id, name, type, description, key, name_a, date_a, name_m, date_m FROM WAI
 
 CREATE VIEW VIEW_LIBRARY AS
 SELECT id, name, type, description, key, name_a, date_a, name_m, date_m FROM LIBRARY NATURAL JOIN types WHERE id_access = 'ALL';
+
+
+INSERT INTO TYPES(type) VALUES("LOM");

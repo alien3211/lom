@@ -5,9 +5,7 @@ from gi.repository import Gtk, Pango
 
 class MainWindow(Gtk.Window):
 
-    def __init__(self, function):
-
-        self.outdoor_check_function = function
+    def __init__(self):
         Gtk.Window.__init__(self, title="Library Of Mind")
 
         #initialization window
@@ -170,92 +168,10 @@ class MainWindow(Gtk.Window):
         for i, row in enumerate(type_list):
             self.key_store.append([i, row])
 
-    def done_add_record(self, button):
-
-        #check entry name
-        if self.name.get_text() in ["", "Unique name"]:
-            return self.print_error_message()
-        
-        #check select or add type
-        tree_iter = self.type_combo.get_active_iter()
-        if tree_iter == None:
-            if self.type_combo.get_child().get_text() == "":
-                return self.print_error_message("DUPA")
-            else:
-                parent_iter = self.parent_combo.get_active_iter()
-                if parent_iter == None:
-                    return self.print_error_message("Select parent type")
-
-        #check description
-        if self.textbuffer.get_text(*self.textbuffer.get_bounds(), include_hidden_chars=True) == "":
-            return self.print_error_message("Fill in the description")
-
-
-        #check add key
-        text = set()
-        item = self.listkey.get_iter_first()
-
-        while item != None:
-            text.add(self.listkey.get_value(item,0))
-            item = self.listkey.iter_next(item)
-            
-        if len(text) == 0:
-            return self.print_error_message("Add at least one key")
-
-
-        print self.get_data()
-
-        #check in databases
-        self.outdoor_check_function(self)
-
-    def get_data(self):
-
-        record = []
-        record.append(self.name.get_text())
-
-        #get select type 
-        tree_iter_type = self.type_combo.get_active_iter()
-        tree_iter_parent = self.parent_combo.get_active_iter()
-        if tree_iter_type != None:
-            model = self.type_combo.get_model()
-            record.append(model[tree_iter_type][1])
-            record.append("")
-        else:
-            model = self.parent_combo.get_model()
-            record.append(self.type_combo.get_child().get_text())
-            record.append(model[tree_iter_parent][0])
-
-        record.append(self.textbuffer.get_text(*self.textbuffer.get_bounds(), include_hidden_chars=True))
-
-        text = set()
-        item = self.listkey.get_iter_first()
-
-        while item != None:
-            text.add(self.listkey.get_value(item,0))
-            item = self.listkey.iter_next(item)
-
-        record.append(', '.join(text))
-
-        return record
-
-    def print_error_message(self, text="fill all fields"):
-
-        md = Gtk.MessageDialog(self, type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK)
-        md.set_markup(text)   
-        md.run()
-        md.destroy()
-
-        return None
-        
-
-    def main_loop(self):
-        Gtk.main()
-
-    def gtk_quit(self):
-        Gtk.main_quit()
-
+    def done_add_record(self):
+        pass
 
 if __name__ == '__main__':
     win = MainWindow()
-    win.main_loop()
+    Gtk.main()
 

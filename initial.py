@@ -6,6 +6,7 @@ import ConfigParser
 from Tcolors import replace_colour, re_replace_colour, replace_list
 from lomSQL import lomsql 
 from tree import Tree
+from GTKwindow import MainWindow
 
 (_ROOT, _DEPTH, _BREADTH) = range(3)
 
