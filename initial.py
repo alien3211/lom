@@ -63,9 +63,6 @@ def initialization():
     print replace_colour(init_text)
 
 
-    
-
-
 def between(s,left="'", right="'"):
     s = s.replace("\"","'")
     before,_,a = s.partition(left)

@@ -188,6 +188,9 @@ class Parser(object):
                 print '\n\t---- ', i+1, '----\n'
                 print self.print_data(row, options.get('lom', 's_print'))
 
+            variables.update_last_log()
+
+
         elif option[0] == '-a':
             variables.d_current = databases.get('select * from VIEW_WAITING;')
             print replace_colour('\n<green>\t\tALL RECORD WAITING TO ADDED<end>')
@@ -255,7 +258,8 @@ def check_all_paramiter_to_add(window):
 
     id_type = databases.get("select id_type from TYPES where type='" + record[1] + "';")[0][0]
 
-    databases.add("INSERT INTO WAITING(name,id_type,description,key,name_a) VALUES ('" + record[0] + "', "+ str(id_type)+ ", '" + record[3].replace("'",'"') + "', '" + record[4] + "', '" + getenv('USER') +"');")
+    #delete ACCESS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    databases.add("INSERT INTO WAITING(name,id_type,id_access,description,key,name_a) VALUES ('" + record[0] + "', "+ str(id_type)+ ", 2, '" + record[3].replace("'",'"') + "', '" + record[4] + "', '" + getenv('USER') +"');")
     
 
     window.gtk_quit()
