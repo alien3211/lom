@@ -1,8 +1,7 @@
-DROP TABLE IF EXISTS tmp_lib;
+DROP TABLE IF EXISTS keys_list;
 DROP TABLE IF EXISTS waiting_list;
 DROP TABLE IF EXISTS library_list;
 DROP TABLE IF EXISTS types_list;
-DROP TABLE IF EXISTS keys_list;
 DROP TABLE IF EXISTS users_list;
 DROP TABLE IF EXISTS log;
 
@@ -12,7 +11,6 @@ DROP VIEW IF EXISTS TYPE_TREE;
 DROP VIEW IF EXISTS VIEW_WAITING;
 DROP VIEW IF EXISTS VIEW_LIBRARY;
 
-DROP PROCEDURE IF EXISTS hello; 
 DROP PROCEDURE IF EXISTS show_rows_by_key;
 DROP PROCEDURE IF EXISTS insert_role; 
 
@@ -42,12 +40,6 @@ CREATE TABLE users_list (
 );
 //
 
-CREATE TABLE keys_list (
-    key_name VARCHAR(255),
-    id_lib TEXT,
-    PRIMARY KEY (key_name)
-);
-//
 
 CREATE TABLE waiting_list (
     id INTEGER NOT NULL AUTO_INCREMENT,
@@ -88,9 +80,11 @@ CREATE TABLE log (
 );
 //
 
-CREATE TABLE tmp_lib(
-    id INTEGER NOT NULL,
-    FOREIGN KEY (id) REFERENCES library_list (id)
+CREATE TABLE keys_list(
+    key_name VARCHAR(255),
+    id_lib INTEGER,
+    PRIMARY KEY (key_name, id_lib),
+    FOREIGN KEY (id_lib) REFERENCES library_list (id) 
 );
 //
 
@@ -110,7 +104,6 @@ CREATE INDEX lib_type ON library_list(id_type);
 /*----------------------------------
 ---        Create PROCEDURE
 ----------------------------------*/
-
 CREATE PROCEDURE insert_role(in RoleID INT, in MenuID VARCHAR(500))
 BEGIN
     DECLARE idx, prev_idx INT;
@@ -122,48 +115,19 @@ BEGIN
     
     WHILE idx > 0 DO
         SET v_id := substr(MenuID, prev_idx, idx-prev_idx);
-        SET tmp_n := (select id_lib from keys_list where key_name = v_id);
-        IF(tmp_n IS NULL) THEN
-            insert into keys_list VALUES(v_id, RoleID);
-        ELSE
-            update keys_list SET id_lib = CONCAT(tmp_n, ',' , RoleID) where key_name = v_id;
-        END IF;
+	insert into keys_list VALUES(v_id, RoleID);
         SET prev_idx := idx+1;
         SET idx := locate(',',MenuID,prev_idx);
     END WHILE;
 
     SET v_id := substr(MenuID, prev_idx);
-    SET tmp_n := (SELECT id_lib FROM keys_list WHERE key_name = v_id);
-    IF(tmp_n IS NULL) THEN
-        INSERT INTO keys_list VALUES(v_id, RoleID);
-    ELSE
-        UPDATE keys_list SET id_lib = CONCAT(tmp_n, ',' , RoleID) WHERE key_name = v_id;
-    END IF;
+    INSERT INTO keys_list VALUES(v_id, RoleID);
 END
 //
 
 CREATE PROCEDURE show_rows_by_key(in key_n VARCHAR(500))
 BEGIN
-
-    DECLARE idx, prev_idx INT;
-    DECLARE v_id VARCHAR(20);
-    DECLARE librery_id VARCHAR(5000);
-
-    SET librery_id := ( SELECT GROUP_CONCAT(id_lib SEPARATOR ',') FROM keys_list WHERE LOWER(key_name) REGEXP LOWER(key_n));
-    SET idx := locate(',', librery_id,1);
-    SET prev_idx := 1;
-    
-    WHILE idx > 0 DO
-        SET v_id := substr(librery_id, prev_idx, idx-prev_idx);
-        INSERT INTO tmp_lib VALUES(v_id);
-        SET prev_idx := idx+1;
-        SET idx := locate(',',librery_id,prev_idx);
-    END WHILE;
-
-    SET v_id := substr(librery_id, prev_idx);
-    INSERT INTO tmp_lib VALUES(v_id);
-    select DISTINCT * from tmp_lib NATURAL JOIN library_list;
-    DELETE FROM tmp_lib;
+    select VIEW_LIBRARY.* FROM (SELECT DISTINCT id_lib FROM keys_list WHERE LOWER(key_name) REGEXP LOWER(key_n)) AS id_key_list LEFT JOIN VIEW_LIBRARY ON id_key_list.id_lib = VIEW_LIBRARY.id;
 END
 //
 
