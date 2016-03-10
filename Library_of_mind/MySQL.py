@@ -10,17 +10,15 @@ class ConMySQL(object):
         data = []
         try:
 
-            db = MySQLdb.connect('localhost', 'root', 'Murzyn12321', 'LOM')
+            db = MySQLdb.connect('172.19.20.19', 'lom', 'lom', 'LOM')
 
             cur = db.cursor(MySQLdb.cursors.DictCursor)
             cur.execute(query)
             data = cur.fetchallDict()
-            cur.commit()
 
         except MySQLdb.Error, e:
 
             print "Error %d: %s" % (e.args[0], e.args[1])
-            exit(1)
 
         finally:
 
@@ -35,7 +33,7 @@ class ConMySQL(object):
 
         try:
 
-            db = MySQLdb.connect('localhost', 'root', 'Murzyn12321', 'LOM')
+            db = MySQLdb.connect('172.19.20.19', 'lom', 'lom', 'LOM')
 
             cur = db.cursor()
             cur.execute(query)
@@ -44,7 +42,7 @@ class ConMySQL(object):
         except MySQLdb.Error, e:
 
             print "Error %d: %s" % (e.args[0], e.args[1])
-            exit(1)
+	#    raise e
 
         finally:
 
@@ -55,18 +53,36 @@ class ConMySQL(object):
 
     @classmethod
     def getType(cls, pattern):
+    	"""
+    Get Types from DB by pattern 
+    pattern -> regexp"""
         
         query = "SELECT * FROM types_list where type REGEXP '" + pattern + "'"
         return cls.__getData(query)
 
     @classmethod
     def getKey(cls, pattern):
+    	"""
+    Get Keys from DB by pattern
+    pattern -> regexp"""
+
         query = "call show_rows_by_key('" + pattern + "')"
         return cls.__getData(query)
 
     @classmethod
-    def getLib(cls, dictPattern={'id':'.*'}, oper='OR'):
-        query = "SELECT * FROM VIEW_LIBRARY where"
+    def getLib(cls, dictPattern={'id':'.*'}, oper='OR', access=True):
+    	"""
+    Get rows from Library DB
+    dictPattern -> dict{column : pattern} 
+	example {'id' : '[1-5]'} or {'id' : '[1-5]', ''name' : 'RNC'}
+    oper -> str['OR', 'AND']
+	example oper='AND' 
+	SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
+    access -> bool
+	True  -> ALL
+	False -> $USER"""
+
+        query = "SELECT * FROM VIEW_WAITING where id_access = '" + ('ALL' if access == True else os.environ['USER']) + "' AND "
         
         tmp = []
         for (k,v) in dictPattern.items():
@@ -76,8 +92,19 @@ class ConMySQL(object):
         return cls.__getData(query)
 
     @classmethod
-    def getWeit(cls, dictPattern={'id':'.*'}, oper='OR'):
-        query = "SELECT * FROM VIEW_WAITING where"
+    def getWeit(cls, dictPattern={'id':'.*'}, oper='OR', access=True):
+    	"""
+    Get rows from waiting DB
+    dictPattern -> dict{column : pattern} 
+	example {'id' : '[1-5]'} or {'id' : '[1-5]', ''name' : 'RNC'}
+    oper -> str['OR', 'AND']
+	example oper='AND' 
+	SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
+    access -> bool
+	True  -> ALL
+	False -> $USER"""
+
+        query = "SELECT * FROM VIEW_WAITING where id_access = '" + ('ALL' if access == True else os.environ['USER']) + "' AND "
         
         tmp = []
         for (k,v) in dictPattern.items():
@@ -88,40 +115,57 @@ class ConMySQL(object):
 
     @classmethod
     def getUser(cls):
+    	"""Get User from DB"""
         
         query = "SELECT * FROM users_list where user = '" + os.environ['USER'] + "'"
         return cls.__getData(query)
 
     @classmethod
     def setType(cls, name, parent):
+    	"""
+    Add new type
+    name -> str
+    parent -> id_type"""
         
         query = "INSERT INTO types_list(type, id_parent) VALUES('" + name + "'," + parent + ")"
         cls.__setData(query)
 
     @classmethod
     def setUser(cls):
+    	"""Add new user"""
         
         query = "INSERT INTO users_list(user) VALUES('" + os.environ['USER'] + "')"
         cls.__setData(query)
 
     @classmethod
-    def setRow(cls, name, id_type, description, key_list, access="ALL"):
+    def setRow(cls, name, id_type, description, key_list, access=True):
+    	"""
+    Add new row to waiting
+    name -> str
+    id_type -> int (refer to type)
+    description -> str
+    key_list -> str (list keys example: "RNC,,3gsim_Refer" without space)
+    access -> str ['All', [$USER]]"""
         
         query = "INSERT INTO waiting_list(name, id_type, id_access, description, key_list, name_a) \
-                VALUES('%s', %s, '%s', '%s', '%s', '%s')" % (name, id_type, access, description, key_list, os.environ['USER'])
+                VALUES('%s', %s, '%s', '%s', '%s', '%s')" % (name, id_type, ('ALL' if access == True else os.environ['USER']), description, key_list.replace(' ',''), os.environ['USER'])
         cls.__setData(query)
 
     @classmethod
     def updateUser(cls):
+    	"""
+    Update user last_login"""
         
+	befor_update = cls.getUser()
+	if not befor_update:
+	    cls.setUser()
         query_last_log = "UPDATE users_list SET last_log = NOW() where user = '" + os.environ['USER'] + "'"
         cls.__setData(query_last_log)
-        return cls.getUser()
+        return befor_update
 
 if __name__ == '__main__':
 
-    print ConMySQL.getLib({'name': 'rnc', 'type':'LOM'},'OR')
+    #print ConMySQL.getLib({'name': 'rnc', 'type':'LOM'},'OR')
     print ConMySQL.updateUser()
-    ConMySQL.setRow('tam',1,'dupadupa','XFT')
-    print ConMySQL.getLib({'name':'tam'})
-    print ConMySQL.getKey('XFT')
+    #print ConMySQL.getLib({'name':'tam'})
+    #print ConMySQL.getKey('XFT')
