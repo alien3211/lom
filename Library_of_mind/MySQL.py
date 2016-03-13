@@ -70,7 +70,7 @@ class ConMySQL(object):
         return cls.__getData(query)
 
     @classmethod
-    def getLib(cls, dictPattern={'id':'.*'}, oper='OR', access=True):
+    def getLib(cls, dictPattern={'id':'.*'}, oper='OR', access='ALL'):
     	"""
     Get rows from Library DB
     dictPattern -> dict{column : pattern} 
@@ -78,11 +78,9 @@ class ConMySQL(object):
     oper -> str['OR', 'AND']
 	example oper='AND' 
 	SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
-    access -> bool
-	True  -> ALL
-	False -> $USER"""
+    access -> str ['All', [$USER]]"""
 
-        query = "SELECT * FROM VIEW_WAITING where id_access = '" + ('ALL' if access == True else os.environ['USER']) + "' AND "
+        query = "SELECT * FROM VIEW_WAITING where id_access = '" + access + "' AND "
         
         tmp = []
         for (k,v) in dictPattern.items():
@@ -92,7 +90,7 @@ class ConMySQL(object):
         return cls.__getData(query)
 
     @classmethod
-    def getWeit(cls, dictPattern={'id':'.*'}, oper='OR', access=True):
+    def getWeit(cls, dictPattern={'id':'.*'}, oper='OR', access='ALL'):
     	"""
     Get rows from waiting DB
     dictPattern -> dict{column : pattern} 
@@ -100,11 +98,9 @@ class ConMySQL(object):
     oper -> str['OR', 'AND']
 	example oper='AND' 
 	SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
-    access -> bool
-	True  -> ALL
-	False -> $USER"""
+    access -> str ['All', [$USER]]"""
 
-        query = "SELECT * FROM VIEW_WAITING where id_access = '" + ('ALL' if access == True else os.environ['USER']) + "' AND "
+        query = "SELECT * FROM VIEW_WAITING where id_access = '" + access + "' AND "
         
         tmp = []
         for (k,v) in dictPattern.items():
@@ -114,10 +110,10 @@ class ConMySQL(object):
         return cls.__getData(query)
 
     @classmethod
-    def getUser(cls):
+    def getUser(cls, user):
     	"""Get User from DB"""
         
-        query = "SELECT * FROM users_list where user = '" + os.environ['USER'] + "'"
+        query = "SELECT * FROM users_list where user = '" + user + "'"
         return cls.__getData(query)
 
     @classmethod
@@ -131,41 +127,42 @@ class ConMySQL(object):
         cls.__setData(query)
 
     @classmethod
-    def setUser(cls):
+    def setUser(cls, user):
     	"""Add new user"""
         
-        query = "INSERT INTO users_list(user) VALUES('" + os.environ['USER'] + "')"
+        query = "INSERT INTO users_list(user) VALUES('" + user + "')"
         cls.__setData(query)
 
     @classmethod
-    def setRow(cls, name, id_type, description, key_list, access=True):
+    def setRow(cls, name, id_type, description, key_list, user, access='ALL'):
     	"""
     Add new row to waiting
     name -> str
     id_type -> int (refer to type)
     description -> str
     key_list -> str (list keys example: "RNC,,3gsim_Refer" without space)
+    user -> str ($USER)
     access -> str ['All', [$USER]]"""
         
         query = "INSERT INTO waiting_list(name, id_type, id_access, description, key_list, name_a) \
-                VALUES('%s', %s, '%s', '%s', '%s', '%s')" % (name, id_type, ('ALL' if access == True else os.environ['USER']), description, key_list.replace(' ',''), os.environ['USER'])
+                VALUES('%s', %s, '%s', '%s', '%s', '%s')" % (name, id_type, access, description, key_list.replace(' ',''), user)
         cls.__setData(query)
 
     @classmethod
-    def updateUser(cls):
-    	"""
-    Update user last_login"""
+    def updateUser(cls, user):
+    	"""Update user last_login"""
         
-	befor_update = cls.getUser()
+	befor_update = cls.getUser(user)
 	if not befor_update:
-	    cls.setUser()
-        query_last_log = "UPDATE users_list SET last_log = NOW() where user = '" + os.environ['USER'] + "'"
+	    cls.setUser(user)
+        query_last_log = "UPDATE users_list SET last_log = NOW() where user = '" + user + "'"
+
         cls.__setData(query_last_log)
         return befor_update
 
 if __name__ == '__main__':
 
     #print ConMySQL.getLib({'name': 'rnc', 'type':'LOM'},'OR')
-    print ConMySQL.updateUser()
+    print ConMySQL.updateUser(os.environ['USER'])
     #print ConMySQL.getLib({'name':'tam'})
     #print ConMySQL.getKey('XFT')
