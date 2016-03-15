@@ -52,7 +52,7 @@ class ConMySQL(object):
                 db.close()
 
     @classmethod
-    def getType(cls, pattern):
+    def getType(cls, pattern=".*"):
     	"""
     Get Types from DB by pattern 
     pattern -> regexp"""
@@ -61,7 +61,16 @@ class ConMySQL(object):
         return cls.__getData(query)
 
     @classmethod
-    def getKey(cls, pattern):
+    def getTypeByTree(cls, pattern=".*"):
+    	"""
+    Get Types tree from DB by pattern 
+    pattern -> regexp"""
+        
+        query = "SELECT * FROM TYPE_TREE where type REGEXP '" + pattern + "'"
+        return cls.__getData(query)
+
+    @classmethod
+    def getKey(cls, pattern=".*"):
     	"""
     Get Keys from DB by pattern
     pattern -> regexp"""
@@ -117,6 +126,18 @@ class ConMySQL(object):
         return cls.__getData(query)
 
     @classmethod
+    def getHelp(cls, com):
+    	"""Get Help from DB"""
+        
+        query = "SELECT name, s_name, description FROM help_list WHERE name = '" + com + "' OR s_name = '" + com + "'"
+        help = cls.__getData(query)
+
+	if help:
+	    return help
+	else:
+	    return cls.__getData("SELECT name, s_name, description FROM help_list WHERE name = 'ALL'")
+
+    @classmethod
     def setType(cls, name, parent):
     	"""
     Add new type
@@ -160,9 +181,11 @@ class ConMySQL(object):
         cls.__setData(query_last_log)
         return befor_update
 
+
 if __name__ == '__main__':
 
-    #print ConMySQL.getLib({'name': 'rnc', 'type':'LOM'},'OR')
+    print ConMySQL.getLib({'name': 'rnc', 'type':'LOM'},'OR')
     print ConMySQL.updateUser(os.environ['USER'])
-    #print ConMySQL.getLib({'name':'tam'})
-    #print ConMySQL.getKey('XFT')
+    print ConMySQL.getLib({'name':'tam'})
+    print ConMySQL.getKey('XFT')
+    print ConMySQL.getUser(os.environ['USER'])

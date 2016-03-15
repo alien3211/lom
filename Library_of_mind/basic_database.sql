@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS library_list;
 DROP TABLE IF EXISTS types_list;
 DROP TABLE IF EXISTS users_list;
 DROP TABLE IF EXISTS log;
+DROP TABLE IF EXISTS help_list;
 
 DROP TRIGGER IF EXISTS update_news;
 
@@ -88,6 +89,15 @@ CREATE TABLE keys_list(
 );
 //
 
+CREATE TABLE help_list(
+    id INTEGER NOT NULL AUTO_INCREMENT,
+    name VARCHAR(20) NOT NULL,
+    s_name VARCHAR(5) NOT NULL,
+    description TEXT NOT NULL,
+    PRIMARY KEY (id)
+);
+//
+
 /*----------------------------------
 ---         Create INDEX
 ----------------------------------*/
@@ -166,6 +176,22 @@ SELECT id, name, type, description, key_list, name_a, date_a, name_m, date_m, id
 ----------------------------------*/
 
 INSERT INTO types_list(type) VALUES("LOM");
+//
+INSERT INTO help_list(name, s_name, description) VALUES("ALL","","");
+//
+INSERT INTO help_list(name, s_name, description) VALUES("set","","");
+//
+INSERT INTO help_list(name, s_name, description) VALUES("search","s","");
+//
+INSERT INTO help_list(name, s_name, description) VALUES("add","a","");
+//
+INSERT INTO help_list(name, s_name, description) VALUES("update","u", "");
+//
+INSERT INTO help_list(name, s_name, description) VALUES("type","t","");
+//
+INSERT INTO help_list(name, s_name, description) VALUES("key","k","");
+//
+INSERT INTO help_list(name, s_name, description) VALUES("news","n","");
 //
 
 
