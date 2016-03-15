@@ -2,6 +2,8 @@
 #-*- coding: utf-8 -*-
 
 import getopt
+from time import sleep
+from threading import Thread
 
 from keycatch import *
 
@@ -92,9 +94,23 @@ def parseArgs():
         elif opt in ("-m", "--move"):
             parseMove(arg)
 
+class ThreadWindow(Thread):
+    def __init__(self, x):
+        Thread.__init__(self)
+        self.x = x
+    
+    def run(self):
+        sleep(self.x)
+        print "WATEK RUSZONY %d -> %d" % (self.x, self.x**2)
+
+
+
 def startWindow(modifiers, keys):
     if (modifiers[glkey] == True) and (keys == glchar):
-        print "ZACZYNA SIE!!!!"
+        thread = ThreadWindow(2)
+        thread.start()
+        thread.join()
+        print "ZACZYNA SIE!!!!" 
 
 def main():
     parseArgs()
