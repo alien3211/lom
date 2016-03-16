@@ -2,10 +2,10 @@
 #-*- coding: utf-8 -*-
 
 import getopt
-from time import sleep
-from threading import Thread
 
 from keycatch import *
+from ThreadWindow import ThreadWindow
+import log
 
 list_keys = ['', 'left_shift', 'right_shift', 'left_ctrl', 'right_ctrl', 'left_alt', 'right_alt']
 
@@ -18,12 +18,9 @@ def usage(res):
     out = ("""Usage:
   ./Library_of_mind.py <OPTS>
   -h         | --help           this help
-  -f <from>  | --from <from>    original language
-  -t <to>    | --to <to>        destination language
-  -l         | --list           list language
   -k <key>   | --key <key>      keyboard shortcut
-  -c <time>  | --count <time>   long the active window (s)
   -m <multi> | --move <multi>   position in window
+  -d         | --debug          debug
 
   Example:
   ./translateTool.py -f en -t pl
@@ -80,8 +77,8 @@ def parseMove(arg):
 def parseArgs():
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hk:m:",
-                                   ["help","key=", "move="])
+        opts, args = getopt.getopt(sys.argv[1:], "hk:m:d",
+                                   ["help","key=", "move=", "--debug"])
     except getopt.GetoptError, err:
         usage(2)
 
@@ -93,24 +90,23 @@ def parseArgs():
             parseKey(arg)
         elif opt in ("-m", "--move"):
             parseMove(arg)
+        elif opt in ("-d", "--debug"):
+            log.debug = True
 
-class ThreadWindow(Thread):
-    def __init__(self, x):
-        Thread.__init__(self)
-        self.x = x
-
-    def run(self):
-        sleep(self.x)
-        print "WATEK RUSZONY %d -> %d" % (self.x, self.x**2)
 
 
 
 def startWindow(modifiers, keys):
     if (modifiers[glkey] == True) and (keys == glchar):
-        thread = ThreadWindow(2)
+        args= {
+               'x' : glxx,
+               'y' : glyy}
+        log.LOG("BEGIN Thread")
+        thread = ThreadWindow(args)
         thread.start()
+        log.LOG("RUN Thread")
         thread.join()
-        print "ZACZYNA SIE!!!!"
+        log.LOG("END Thread")
 
 def main():
     parseArgs()
