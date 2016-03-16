@@ -32,7 +32,7 @@ def parserArgument(arg):
         return getDigit(int(command))
 
 def getHelp(com):
-    
+
     return ConMySQL.getHelp(com)
 
 def search(com):
@@ -49,7 +49,7 @@ def getType(com):
     	return ConMySQL,getType()
 
 def getKey(com):
-    
+
     if com:
     	return ConMySQL.getKey(com)
     else:

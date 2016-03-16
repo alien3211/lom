@@ -98,7 +98,7 @@ class ThreadWindow(Thread):
     def __init__(self, x):
         Thread.__init__(self)
         self.x = x
-    
+
     def run(self):
         sleep(self.x)
         print "WATEK RUSZONY %d -> %d" % (self.x, self.x**2)
@@ -110,7 +110,7 @@ def startWindow(modifiers, keys):
         thread = ThreadWindow(2)
         thread.start()
         thread.join()
-        print "ZACZYNA SIE!!!!" 
+        print "ZACZYNA SIE!!!!"
 
 def main():
     parseArgs()
