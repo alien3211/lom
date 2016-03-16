@@ -21,7 +21,7 @@ class WatekOblicz(Thread):
             if req is None:
                 self.kolejka_zadan.task_done()
                 break
-            
+
             value, kolejka_rezultatow = req
             result = oblicz(value)
             log("%s %s -> %s" % (self.getName(), value, result))

@@ -27,18 +27,18 @@ class Tree:
     def display(self, identifier, depth=_ROOT):
         children = self[identifier].children
         if depth == _ROOT:
-            print "{0}".format(identifier) 
+            print "{0}".format(identifier)
         else:
             char = list(u" │"*depth)
             char[-1] = u"└─"
-            print ''.join(char), "{0}".format(identifier) 
+            print ''.join(char), "{0}".format(identifier)
 
         depth += 1
         for child in children:
             self.display(child, depth)  # recursive call
 
     def traverse(self, identifier, mode=_DEPTH):
-        # Python generator. Loosly based on an algorithm from 
+        # Python generator. Loosly based on an algorithm from
         yield identifier
         queue = self[identifier].children
         while queue:

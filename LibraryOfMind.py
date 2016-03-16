@@ -5,10 +5,10 @@ from parser import *
 import readline
 
 readline.parse_and_bind("tab: complete")
-        
+
 
 if __name__ == '__main__':
-    
+
     import sys
     import os
 
@@ -20,7 +20,7 @@ if __name__ == '__main__':
         try:
 
             patern = raw_input(options.get('lom','prompt'))
-            
+
             if patern.lower() in ('q', 'exit', 'quit'):
                 print 'Thanks for used this aplication'
                 exit(0)

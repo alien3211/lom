@@ -22,13 +22,13 @@ class MainWindow(Gtk.Window):
         label.modify_font(Pango.FontDescription("sans 28"))
         fix.put(label, 10, 10)
 
-        #Box to name 
+        #Box to name
         hbox = Gtk.Box(spacing=6)
         fix.put(hbox, 10, 75)
 
         label = Gtk.Label("Name:")
         hbox.pack_start(label, True, True, 0)
-        
+
         self.name = Gtk.Entry()
         self.name.set_text("Unique name")
         hbox.pack_start(self.name, True, True, 0)
@@ -42,7 +42,7 @@ class MainWindow(Gtk.Window):
 
         #list type name
         self.name_store = Gtk.ListStore(int, str)
-        
+
         #add/selected type
         self.type_combo = Gtk.ComboBox.new_with_model_and_entry(self.name_store)
         self.type_combo.set_entry_text_column(1)
@@ -62,7 +62,7 @@ class MainWindow(Gtk.Window):
         #label to description
         label = Gtk.Label("Description:")
         fix.put(label, 10, 180)
-        
+
         #Box to description
         hbox = Gtk.Box(spacing=6)
         fix.put(hbox, 10, 210)
@@ -96,19 +96,19 @@ class MainWindow(Gtk.Window):
 
         #list type key
         self.key_store = Gtk.ListStore(int, str)
-        
+
         #add/selected key
         self.key_combo = Gtk.ComboBox.new_with_model_and_entry(self.key_store)
         self.key_combo.set_entry_text_column(1)
         hbox.pack_start(self.key_combo, False, False, True)
 
-        #add key 
+        #add key
         self.key_button = Gtk.Button("Add Key")
         self.key_button.connect("clicked", self.on_add_key)
         hbox.pack_start(self.key_button, True, True, 0)
 
 
-        #delete key 
+        #delete key
         self.delete_button = Gtk.Button("Delete")
         self.delete_button.connect("clicked", self.delete_key)
         fix.put(self.delete_button, 220, 650)
@@ -149,7 +149,7 @@ class MainWindow(Gtk.Window):
             if entry.get_text() != "":
                 self.listkey.append([entry.get_text()])
 
-    
+
     def delete_key(self, button):
         selection = self.treeview.get_selection()
         result = selection.get_selected()
@@ -161,7 +161,7 @@ class MainWindow(Gtk.Window):
             pass
 
     def add_type(self, type_list):
-        
+
         for i, row in enumerate(type_list):
             self.name_store.append([i, row])
             self.parent_store.append([row])
@@ -175,7 +175,7 @@ class MainWindow(Gtk.Window):
         #check entry name
         if self.name.get_text() in ["", "Unique name"]:
             return self.print_error_message()
-        
+
         #check select or add type
         tree_iter = self.type_combo.get_active_iter()
         if tree_iter == None:
@@ -198,7 +198,7 @@ class MainWindow(Gtk.Window):
         while item != None:
             text.add(self.listkey.get_value(item,0))
             item = self.listkey.iter_next(item)
-            
+
         if len(text) == 0:
             return self.print_error_message("Add at least one key")
 
@@ -213,7 +213,7 @@ class MainWindow(Gtk.Window):
         record = []
         record.append(self.name.get_text())
 
-        #get select type 
+        #get select type
         tree_iter_type = self.type_combo.get_active_iter()
         tree_iter_parent = self.parent_combo.get_active_iter()
         if tree_iter_type != None:
@@ -241,12 +241,12 @@ class MainWindow(Gtk.Window):
     def print_error_message(self, text="fill all fields"):
 
         md = Gtk.MessageDialog(self, type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK)
-        md.set_markup(text)   
+        md.set_markup(text)
         md.run()
         md.destroy()
 
         return None
-        
+
 
     def main_loop(self):
         Gtk.main()

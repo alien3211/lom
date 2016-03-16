@@ -13,7 +13,7 @@ except ImportError:
 
 
 class MySQLError(StandardError):
-    
+
     """Exception related to operation with MySQL."""
 
 

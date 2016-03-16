@@ -11,7 +11,7 @@ CREATE TABLE TYPES
     id_parent INTEGER REFERENCES TYPES(id_type));
 
 
-CREATE TABLE USERS 
+CREATE TABLE USERS
     (user TEXT PRIMARY KEY,
     date_s DATE DEFAULT (datetime('now')),
     last_log DATE DEFAULT (datetime('now')),

@@ -4,7 +4,7 @@
 from os import getenv
 import ConfigParser
 from Tcolors import replace_colour, re_replace_colour, replace_list
-from lomSQL import lomsql 
+from lomSQL import lomsql
 from tree import Tree
 from GTKwindow import MainWindow
 
@@ -47,7 +47,7 @@ def initialization():
     if databases.get('SELECT user from USERS where user="' + options.get('lom','user') + '";') == []:
         databases.add('INSERT INTO USERS(user, id_access) VALUES ("' + options.get('lom','user') + '", 3)')
         print "Current user are exist"
-        
+
     variables.last_log = databases.get('SELECT last_log FROM USERS WHERE user=\'' + options.get('lom','user') + '\';')[0][0]
     variables.news_waiting = databases.get('select * from WAITING w where w.data_a > \'' + variables.last_log + '\';')
     variables.news_added = databases.get('select * from LIBRARY l where l.data_a > \'' + variables.last_log + '\';')
@@ -63,7 +63,7 @@ def initialization():
     print replace_colour(init_text)
 
 
-    
+
 
 
 def between(s,left="'", right="'"):

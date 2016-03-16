@@ -3,7 +3,7 @@ pygtk.require('2.0')
 import gtk
 
 class Basewindow:
-    
+
     def delete_event(self, widget, event, data=None):
         print "delete event"
         return False

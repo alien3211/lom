@@ -13,7 +13,7 @@ DROP VIEW IF EXISTS VIEW_WAITING;
 DROP VIEW IF EXISTS VIEW_LIBRARY;
 
 DROP PROCEDURE IF EXISTS show_rows_by_key;
-DROP PROCEDURE IF EXISTS insert_role; 
+DROP PROCEDURE IF EXISTS insert_role;
 
 delimiter //
 
@@ -54,7 +54,7 @@ CREATE TABLE waiting_list (
     name_m VARCHAR(50) DEFAULT NULL,
     date_m TIMESTAMP,
     PRIMARY KEY (id),
-    FOREIGN KEY (id_type) REFERENCES types_list (id_type) 
+    FOREIGN KEY (id_type) REFERENCES types_list (id_type)
 );
 //
 
@@ -70,7 +70,7 @@ CREATE TABLE library_list (
     name_m VARCHAR(50) DEFAULT NULL,
     date_m TIMESTAMP,
     PRIMARY KEY (id),
-    FOREIGN KEY (id_type) REFERENCES types_list (id_type) 
+    FOREIGN KEY (id_type) REFERENCES types_list (id_type)
 );
 //
 
@@ -85,7 +85,7 @@ CREATE TABLE keys_list(
     key_name VARCHAR(255),
     id_lib INTEGER,
     PRIMARY KEY (key_name, id_lib),
-    FOREIGN KEY (id_lib) REFERENCES library_list (id) 
+    FOREIGN KEY (id_lib) REFERENCES library_list (id)
 );
 //
 
@@ -122,7 +122,7 @@ BEGIN
 
     SET idx := locate(',', MenuID,1);
     SET prev_idx := 1;
-    
+
     WHILE idx > 0 DO
         SET v_id := substr(MenuID, prev_idx, idx-prev_idx);
 	insert into keys_list VALUES(v_id, RoleID);
@@ -147,7 +147,7 @@ END
 
 CREATE TRIGGER update_news AFTER INSERT ON waiting_list
 FOR EACH ROW
-BEGIN 
+BEGIN
     UPDATE users_list SET if_new = 1;
     INSERT INTO log(user, name) VALUES (NEW.name_a, NEW.name);
     INSERT INTO library_list select * from waiting_list where id = NEW.id;

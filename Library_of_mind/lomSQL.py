@@ -1,7 +1,7 @@
 import sqlite3
 
 class lomsql:
-    
+
     def __init__(self, name="test.db"):
         self.name = name
         print "Connected to ",self.name
@@ -19,4 +19,4 @@ class lomsql:
             table = conn.execute(operation).fetchall()
             conn.close()
             return table
-    
+

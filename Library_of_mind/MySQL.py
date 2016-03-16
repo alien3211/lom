@@ -54,18 +54,18 @@ class ConMySQL(object):
     @classmethod
     def getType(cls, pattern=".*"):
     	"""
-    Get Types from DB by pattern 
+    Get Types from DB by pattern
     pattern -> regexp"""
-        
+
         query = "SELECT * FROM types_list where type REGEXP '" + pattern + "'"
         return cls.__getData(query)
 
     @classmethod
     def getTypeByTree(cls, pattern=".*"):
     	"""
-    Get Types tree from DB by pattern 
+    Get Types tree from DB by pattern
     pattern -> regexp"""
-        
+
         query = "SELECT * FROM TYPE_TREE where type REGEXP '" + pattern + "'"
         return cls.__getData(query)
 
@@ -82,15 +82,15 @@ class ConMySQL(object):
     def getLib(cls, dictPattern={'id':'.*'}, oper='OR', access='ALL'):
     	"""
     Get rows from Library DB
-    dictPattern -> dict{column : pattern} 
+    dictPattern -> dict{column : pattern}
 	example {'id' : '[1-5]'} or {'id' : '[1-5]', ''name' : 'RNC'}
     oper -> str['OR', 'AND']
-	example oper='AND' 
+	example oper='AND'
 	SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
     access -> str ['All', [$USER]]"""
 
         query = "SELECT * FROM VIEW_WAITING where id_access = '" + access + "' AND "
-        
+
         tmp = []
         for (k,v) in dictPattern.items():
             tmp.append(" %s REGEXP '%s' " % (k,v))
@@ -102,15 +102,15 @@ class ConMySQL(object):
     def getWeit(cls, dictPattern={'id':'.*'}, oper='OR', access='ALL'):
     	"""
     Get rows from waiting DB
-    dictPattern -> dict{column : pattern} 
+    dictPattern -> dict{column : pattern}
 	example {'id' : '[1-5]'} or {'id' : '[1-5]', ''name' : 'RNC'}
     oper -> str['OR', 'AND']
-	example oper='AND' 
+	example oper='AND'
 	SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
     access -> str ['All', [$USER]]"""
 
         query = "SELECT * FROM VIEW_WAITING where id_access = '" + access + "' AND "
-        
+
         tmp = []
         for (k,v) in dictPattern.items():
             tmp.append(" %s REGEXP '%s' " % (k,v))
@@ -121,14 +121,14 @@ class ConMySQL(object):
     @classmethod
     def getUser(cls, user):
     	"""Get User from DB"""
-        
+
         query = "SELECT * FROM users_list where user = '" + user + "'"
         return cls.__getData(query)
 
     @classmethod
     def getHelp(cls, com):
     	"""Get Help from DB"""
-        
+
         query = "SELECT name, s_name, description FROM help_list WHERE name = '" + com + "' OR s_name = '" + com + "'"
         help = cls.__getData(query)
 
@@ -143,14 +143,14 @@ class ConMySQL(object):
     Add new type
     name -> str
     parent -> id_type"""
-        
+
         query = "INSERT INTO types_list(type, id_parent) VALUES('" + name + "'," + parent + ")"
         cls.__setData(query)
 
     @classmethod
     def setUser(cls, user):
     	"""Add new user"""
-        
+
         query = "INSERT INTO users_list(user) VALUES('" + user + "')"
         cls.__setData(query)
 
@@ -164,7 +164,7 @@ class ConMySQL(object):
     key_list -> str (list keys example: "RNC,,3gsim_Refer" without space)
     user -> str ($USER)
     access -> str ['All', [$USER]]"""
-        
+
         query = "INSERT INTO waiting_list(name, id_type, id_access, description, key_list, name_a) \
                 VALUES('%s', %s, '%s', '%s', '%s', '%s')" % (name, id_type, access, description, key_list.replace(' ',''), user)
         cls.__setData(query)
@@ -172,7 +172,7 @@ class ConMySQL(object):
     @classmethod
     def updateUser(cls, user):
     	"""Update user last_login"""
-        
+
 	befor_update = cls.getUser(user)
 	if not befor_update:
 	    cls.setUser(user)

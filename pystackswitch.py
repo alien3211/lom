@@ -4,7 +4,7 @@
 from gi.repository import Gtk
 
 class MyWindow(Gtk.Window):
-    
+
     def __init__(self):
         Gtk.Window.__init__(self, title="TEST")
         self.set_border_width(10)
@@ -37,7 +37,7 @@ class MyWindow(Gtk.Window):
         switch.connect("notify::active", self.on_switch_activated)
         switch.set_active(True)
         vbox.pack_start(switch, True, True, 0)
-        
+
     def on_switch_activated(self, switch, gparam):
 
         if switch.get_active():

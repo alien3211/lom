@@ -6,12 +6,12 @@ from initial import *
 
 
 class Parser(object):
-    
+
     def __init__(self):
         pass
 
     def checkPatern(self,patern):
-        
+
         rest = patern.split()[::-1]
         command = rest.pop()
 
@@ -38,7 +38,7 @@ class Parser(object):
         return "TO JEST HELP",' '.join(option)
 
     def set_option(self, option):
-        
+
         if len(option) >= 2:
             if option[0] in options.options('lom'):
                 options.set('lom', option[0], replace_colour(between(' '.join(option))[1]))
@@ -72,7 +72,7 @@ class Parser(object):
         return "set record", ' '.join(option)
 
     def print_type(self, option):
-        
+
         if len(option) == 0:
             variables.types = databases.get('SELECT type FROM TYPES ORDER BY type;')
             for i,branch in enumerate(variables.types):
@@ -113,9 +113,9 @@ class Parser(object):
                     print i,branch[0]
 
         return ""
-    
+
     def print_key(self, option):
-        
+
         print ""
         if len(option) == 0:
             variables.keys = databases.get('SELECT key, id_lib FROM KEYS;');
@@ -131,7 +131,7 @@ class Parser(object):
                         name_type = variables.keys[(number - 1)][1]
                     else:
                         return replace_colour('\t<red>Please enter a number beetween <cyan><1,' + str(len(variables.keys)) + '><end>\n')
-                        
+
                 else:
                     for key in veriables.keys():
                         if key[0] == option[0]:
@@ -157,7 +157,7 @@ class Parser(object):
                 if regex.search(key[0]):
                     variables.keys.append(key)
                     print replace_colour('<green>{:<5}<end>{:15}<red>{}<end>'.format(i+1, key[0], key[1]))
-            
+
         return ""
 
     def digit(self, number):
@@ -215,7 +215,7 @@ class Parser(object):
         return ""
 
     def print_data(self, row, rule = None):
-        
+
         if rule == None:
             rule = options.get('lom', 'l_print')
 
@@ -228,10 +228,10 @@ class Parser(object):
 
         return (rule.format(row[0], row[1], row[2], '\n   ' + row[3], row[4], row[5], row[6], row[7], row[8])).replace('\\n', '\n   ')
 
-        
+
 
 def check_all_paramiter_to_add(window):
-    
+
     record = window.get_data()
     all_name = databases.get('select name from WAITING;')[0]
     all_name += databases.get('select name from LIBRARY;')[0]
@@ -256,7 +256,7 @@ def check_all_paramiter_to_add(window):
     id_type = databases.get("select id_type from TYPES where type='" + record[1] + "';")[0][0]
 
     databases.add("INSERT INTO WAITING(name,id_type,description,key,name_a) VALUES ('" + record[0] + "', "+ str(id_type)+ ", '" + record[3].replace("'",'"') + "', '" + record[4] + "', '" + getenv('USER') +"');")
-    
+
 
     window.gtk_quit()
     window.destroy()
