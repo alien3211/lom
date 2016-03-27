@@ -255,7 +255,10 @@ class MainWindow(Gtk.Window):
         Gtk.main_quit()
 
 
+def nic(a):
+    pass
+
 if __name__ == '__main__':
-    win = MainWindow()
+    win = MainWindow(nic)
     win.main_loop()
 

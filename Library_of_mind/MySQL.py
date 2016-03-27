@@ -10,7 +10,7 @@ class ConMySQL(object):
         data = []
         try:
 
-            db = MySQLdb.connect('172.19.20.19', 'lom', 'lom', 'LOM')
+            db = MySQLdb.connect('localhost', 'lom', 'lom', 'LOM')
 
             cur = db.cursor(MySQLdb.cursors.DictCursor)
             cur.execute(query)
@@ -33,7 +33,7 @@ class ConMySQL(object):
 
         try:
 
-            db = MySQLdb.connect('172.19.20.19', 'lom', 'lom', 'LOM')
+            db = MySQLdb.connect('localhost', 'lom', 'lom', 'LOM')
 
             cur = db.cursor()
             cur.execute(query)
@@ -60,20 +60,64 @@ class ConMySQL(object):
         query = "SELECT * FROM types_list where type REGEXP '" + pattern + "'"
         return cls.__getData(query)
 
+
+    @classmethod
+    def getWhereTypeAndParent(cls, text, id_parent):
+    	"""
+    Get Types from DB by text
+    text -> text
+    id_parent -> int"""
+
+        query = "SELECT * FROM types_list where type = '" + text + "' AND id_parent = " + str(id_parent)
+        return cls.__getData(query)
+
     @classmethod
     def getTypeByTree(cls, pattern=".*"):
     	"""
     Get Types tree from DB by pattern
     pattern -> regexp"""
 
-        query = "SELECT * FROM TYPE_TREE where type REGEXP '" + pattern + "'"
-        return cls.__getData(query)
+        query = "SELECT ID, CHILDREN, ID_PARENT, PARENT FROM TYPE_TREE where PARENT REGEXP '" + pattern + "'"
+        treeData = cls.__getData(query)
+
+        print treeData
+        result = {(1L, 'LOM'): []}
+
+        for row in treeData:
+            child = (row['ID'], row['CHILDREN'])
+            parent = (row['ID_PARENT'], row['PARENT'])
+
+
+            if parent in result.keys():
+                result[parent].append(child)
+            else:
+                result[(parent)] = [child]
+
+        return result
 
     @classmethod
     def getKey(cls, pattern=".*"):
     	"""
     Get Keys from DB by pattern
     pattern -> regexp"""
+
+        query = "SELECT * FROM keys_list where key_name REGEXP '" + pattern + "'"
+        return cls.__getData(query)
+
+    @classmethod
+    def getUniqueKey(cls, pattern=".*"):
+    	"""
+    Get unique Keys from DB by pattern
+    pattern -> regexp"""
+
+        query = "SELECT DISTINCT key_name FROM keys_list where key_name REGEXP '" + pattern + "'"
+        return cls.__getData(query)
+
+    @classmethod
+    def getRowByKey(cls, pattern=".*"):
+    	"""
+    Get row from DB by pattern key
+    pattern -> regexp(key)"""
 
         query = "call show_rows_by_key('" + pattern + "')"
         return cls.__getData(query)
@@ -144,7 +188,7 @@ class ConMySQL(object):
     name -> str
     parent -> id_type"""
 
-        query = "INSERT INTO types_list(type, id_parent) VALUES('" + name + "'," + parent + ")"
+        query = "INSERT INTO types_list(type, id_parent) VALUES('" + name + "'," + str(parent) + ")"
         cls.__setData(query)
 
     @classmethod
@@ -181,11 +225,12 @@ class ConMySQL(object):
         cls.__setData(query_last_log)
         return befor_update
 
-
 if __name__ == '__main__':
 
     print ConMySQL.getLib({'name': 'rnc', 'type':'LOM'},'OR')
     print ConMySQL.updateUser(os.environ['USER'])
     print ConMySQL.getLib({'name':'tam'})
-    print ConMySQL.getKey('XFT')
     print ConMySQL.getUser(os.environ['USER'])
+    print ConMySQL.getTypeByTree()
+    print ConMySQL.getKey()
+    print ConMySQL.getUniqueKey()
