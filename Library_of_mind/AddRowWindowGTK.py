@@ -144,7 +144,7 @@ class HellowWorldGTK:
         if len(text) == 0:
             return self.print_error_message("Add at least one key")
 
-        dataRow['keys'] = ",".join(text)
+        dataRow['keys'] = ",".join(text).replace(' ', '_')
 
         self.addWaitingRow(dataRow)
 

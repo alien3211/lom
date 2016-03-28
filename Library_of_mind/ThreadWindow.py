@@ -10,4 +10,5 @@ class ThreadWindow(Thread):
 
     def run(self):
         log.LOG("IN thread window")
-        window = getWindow(self.args)
+        self.window = getWindow(self.args)
+        self.window.main()

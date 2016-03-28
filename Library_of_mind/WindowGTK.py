@@ -11,9 +11,17 @@ import pango
 class Window(gtk.Window):
 
     def __init__(self):
-        pass
+        gtk.Window.__init__(self)
+        self.set_title("Library Of Mind")
 
-    def main_loop(self):
+        #initialization window
+        self.set_border_width(10)
+        self.set_size_request(500,750)
+        self.set_position(gtk.WIN_POS_CENTER)
+        self.connect("delete-event", gtk.main_quit)
+        self.show_all()
+
+    def main(self):
         "Run main loop"
         gtk.main()
 
