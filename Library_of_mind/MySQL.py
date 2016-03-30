@@ -81,11 +81,11 @@ class ConMySQL(object):
         treeData = cls.__getData(query)
 
         print treeData
-        result = {(1L, 'LOM'): []}
+        result = {('LOM', 1L): []}
 
         for row in treeData:
-            child = (row['ID'], row['CHILDREN'])
-            parent = (row['ID_PARENT'], row['PARENT'])
+            child = (row['CHILDREN'], row['ID'])
+            parent = (row['PARENT'], row['ID_PARENT'])
 
 
             if parent in result.keys():

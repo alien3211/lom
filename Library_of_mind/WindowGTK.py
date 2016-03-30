@@ -1,57 +1,135 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
+from gi.repository import Gtk as gtk
 import log
+from MySQL import ConMySQL
 
-import pygtk
-pygtk.require('2.0')
-import gtk
-import pango
+class Window():
 
-class Window(gtk.Window):
+    def __init__(self, configData={}):
 
-    def __init__(self):
-        gtk.Window.__init__(self)
-        self.set_title("Library Of Mind")
+        self.configData = configData
+        self.component = {}
 
-        #initialization window
-        self.set_border_width(10)
-        self.set_size_request(500,750)
-        self.set_position(gtk.WIN_POS_CENTER)
-        self.connect("delete-event", gtk.main_quit)
-        self.show_all()
+        # Parse glade XML
+        self.gladefile = "Library_of_mind/MainWindow.glade"
+        self.glade = gtk.Builder()
+        self.glade.add_from_file(self.gladefile)
+        self.glade.connect_signals(self)
+
+        # get object
+        self.component['help'] = ""
+        self.component['set'] = {}
+        self.component['search'] = gtk.ListStore(int, str, str, str)
+        self.component['update'] = gtk.ListStore(int, str, str, str)
+        self.component['add'] = {}
+        self.component['type'] = gtk.TreeStore(str, int)
+        self.component['news'] = gtk.ListStore(int, str, str, str)
+        self.component['keys'] = gtk.ListStore(str, int) 
+        self.window = self.glade.get_object("window")
+        self.gridMain = self.glade.get_object("gridMain")
+        self.entryCommandLine = self.glade.get_object("entryCommandLine")
+        self.labelText = None
+        self.treeViewResult = None
+
+        # initial window
+        self.initialWindow()
+
+        # show all object
+        self.window.show_all()
+
+    def initialWindow(self):
+        self.commonLayout()
+
+    def print_error_message(self, text="fill all fields"):
+
+        md = gtk.MessageDialog(self.window, type=gtk.MessageType.ERROR, buttons=gtk.ButtonsType.OK)
+        md.set_markup(text)
+        md.run()
+        md.destroy()
+
+        return None
 
     def main(self):
         "Run main loop"
         gtk.main()
 
-    def gtk_quit(self):
-        "Terminate Window"
+    def deleteEvent(self, widget, event):
         gtk.main_quit()
 
-    def parserArgs(args):
+    def parserArgs(self, widget):
 
+        arg = widget.get_text()
         rest = arg.split()
-        command = rest.pop(-1)
+        command = rest.pop(0)
+
+        self.commonLayout()
 
         if command in ['help', 'h']:
-            return getHelp(rest)
+            self.getHelp(rest)
         elif command in ['set']:
-            return setOption(rest)
+            self.setOption(rest)
         elif command in ['search', 's']:
-            return search(rest)
+            self.search(rest)
         elif command in ['add','a']:
-            return addRecord()
+            self.addRecord()
         elif command in ['update', 'u']:
-            return updateRecord(rest)
+            self.updateRecord(rest)
         elif command in ['type', 't']:
-            return getType(rest)
+            log.LOG("GetType")
+            self.getType(rest)
         elif command in ['key', 'k']:
-            return getKey(rest)
+            self.getKey(rest)
         elif command in ['news', 'n']:
-            return getNews(rest)
+            self.getNews(rest)
+        elif command in ['exit', 'bye']:
+            gtk.main_quit()
+            self.window.destroy()
+
         elif command.isdigit():
-            return getDigit(int(command))
+            self.getDigit(int(command))
+
+    def commonLayout(self):
+
+        self.entryCommandLine.set_text("")
+        widget = self.gridMain.get_child_at(0,1)
+        if widget != None:
+            self.gridMain.remove(widget)
+
+
+    def labelLayout(self):
+
+        self.labelLayout = gtk.Label()
+        self.labelLayout.set_size_request(450,200)
+        self.gridMain.attach(self.labelLayout,0,1,1,1)
+
+
+    def treeViewLayout(self, model, create_columns):
+        """
+        Create treeView
+        model -> GTK Storage
+        create_columns - > function to create columns
+        """
+
+        log.LOG("Create Scroll")
+        sw = gtk.ScrolledWindow()
+        sw.set_shadow_type(gtk.ShadowType.IN)
+        sw.set_size_request(450, 200)
+        sw.set_can_focus(True)
+        sw.set_visible(True)
+        sw.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.AUTOMATIC)
+        self.gridMain.attach(sw,0,1,1,1)
+        log.LOG("(0,1): %s" % self.gridMain.get_child_at(0,1))
+
+        self.treeViewResult = gtk.TreeView()
+        self.treeViewResult.set_size_request(450, 200)
+        self.treeViewResult.set_visible(True)
+        self.treeViewResult.set_can_focus(True)
+        self.treeViewResult.set_model(model)
+        self.treeViewResult.set_search_column(0)
+        sw.add(self.treeViewResult)
+        create_columns(self.treeViewResult)
 
     def getHelp(com):
 
@@ -63,12 +141,52 @@ class Window(gtk.Window):
     def addRecord(com):
         pass
 
-    def getType(com):
+    def getType(self, com):
 
+        log.LOG("START getType")
+
+        # clean TreeStore
+        self.component['type'].clear()
+
+        typeData = ConMySQL.getTypeByTree()
+
+        # Show all type by pattern
         if com:
-            return ConMySQL.getType(com)
+            types = ConMySQL.getType(' '.join(com))
+            for type in types:
+                child = (type['type'], type['id_type'])
+
+                parent = self.component['type'].append(None, child)
+                self.addRowToTreeView(typeData, child, parent)
+
         else:
-            return ConMySQL,getType()
+        # Show all type
+            self.addRowToTreeView(typeData)
+
+        # Create, TreeView Layout
+        self.treeViewLayout(self.component['type'], self.createTypeColumn)
+        log.LOG("END getType")
+
+    def createTypeColumn(self, treeView):
+
+        rendererText = gtk.CellRendererText()
+        column = gtk.TreeViewColumn("Type", rendererText, text=0)
+        column.set_clickable(True)
+        column.set_sort_indicator(True)
+        column.set_sort_column_id(0)
+        treeView.append_column(column)
+
+
+    def addRowToTreeView(self, typeData, parentName=('LOM', 1), parent=None):
+
+        if not typeData.get(parentName):
+            return
+        else:
+            for child in typeData[parentName]:
+                newParent = self.component['type'].append(parent, [child[0],child[1]])
+                if typeData.get(child):
+                    self.addRowToTreeView(typeData, child, newParent)
+
 
     def getKey(com):
 

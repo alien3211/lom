@@ -4,9 +4,8 @@
 from gi.repository import Gtk as gtk
 import log
 from MySQL import ConMySQL
-from time import sleep
 
-class HellowWorldGTK:
+class AddRowWindowGTK:
 
     def __init__(self, user):
 
@@ -19,6 +18,7 @@ class HellowWorldGTK:
         self.glade.connect_signals(self)
 
         # initial object
+        self.window = self.glade.get_object("window")
         self.eName = self.glade.get_object("entryName")
         self.eType = self.glade.get_object("entryType")
         self.treeVType = self.glade.get_object("treeviewType")
@@ -29,7 +29,6 @@ class HellowWorldGTK:
         self.comboBStoreKey = self.glade.get_object("liststoreKey")
         self.treeVKeys = self.glade.get_object("treeviewKeys")
         self.treeVStoreKeys = self.glade.get_object("liststoreTreeKeys")
-        self.window = self.glade.get_object("window")
 
         # initial text
         self.initialText()
@@ -173,7 +172,7 @@ class HellowWorldGTK:
 
 if __name__ == "__main__":
     try:
-        gtkWindow = HellowWorldGTK('pi')
+        gtkWindow = AddRowWindowGTK('pi')
         gtkWindow.main()
     except KeyboardInterrupt:
         pass
