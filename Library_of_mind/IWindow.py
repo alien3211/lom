@@ -3,13 +3,16 @@
 
 import log
 import pkgutil
+import os
 
-def getWindow(a):
+def getWindow(configData):
     log.LOG("IN GETWINDOW")
     if pkgutil.find_loader('gtk') is not None: 
         log.LOG("import GTK")
         import WindowGTK
-        return WindowGTK.Window()
+        configData['user'] = os.environ['USER']
+        configData['lomrc'] = os.environ['HOME'] + "/.lomrc"
+        return WindowGTK.Window(configData)
     elif pkgutil.find_loader('PyQt') is not None: 
         log.LOG("import QT")
         import WindowQT

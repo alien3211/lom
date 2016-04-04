@@ -6,6 +6,7 @@ import getopt
 from keycatch import *
 from ThreadWindow import ThreadWindow
 import log
+import os
 
 list_keys = ['', 'left_shift', 'right_shift', 'left_ctrl', 'right_ctrl', 'left_alt', 'right_alt']
 
@@ -94,13 +95,12 @@ def parseArgs():
             log.debug = True
 
 
-
-
 def startWindow(modifiers, keys):
     if (modifiers[glkey] == True) and (keys == glchar):
         args= {
                'x' : glxx,
                'y' : glyy}
+
         log.LOG("BEGIN Thread")
         thread = ThreadWindow(args)
         thread.start()

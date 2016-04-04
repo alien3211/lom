@@ -1,5 +1,6 @@
 import MySQLdb
 from sys import exit
+from datetime import datetime
 import os
 
 class ConMySQL(object):
@@ -80,7 +81,6 @@ class ConMySQL(object):
         query = "SELECT ID, CHILDREN, ID_PARENT, PARENT FROM TYPE_TREE where PARENT REGEXP '" + pattern + "'"
         treeData = cls.__getData(query)
 
-        print treeData
         result = {('LOM', 1L): []}
 
         for row in treeData:
@@ -96,7 +96,7 @@ class ConMySQL(object):
         return result
 
     @classmethod
-    def getKey(cls, pattern=".*"):
+    def getKeys(cls, pattern=".*"):
     	"""
     Get Keys from DB by pattern
     pattern -> regexp"""
@@ -105,7 +105,7 @@ class ConMySQL(object):
         return cls.__getData(query)
 
     @classmethod
-    def getUniqueKey(cls, pattern=".*"):
+    def getUniqueKeys(cls, pattern=".*"):
     	"""
     Get unique Keys from DB by pattern
     pattern -> regexp"""
@@ -170,7 +170,17 @@ class ConMySQL(object):
         return cls.__getData(query)
 
     @classmethod
-    def getHelp(cls, com):
+    def getNews(cls, user):
+    	"""Get News from DB"""
+
+        duser = cls.getUser(user)[0]
+
+        query = "SELECT * FROM VIEW_WAITING WHERE date_a > '" + duser['last_log'].strftime("%Y-%m-%d %T") + "'"
+
+        return cls.__getData(query)
+
+    @classmethod
+    def getHelp(cls, com='ALL'):
     	"""Get Help from DB"""
 
         query = "SELECT name, s_name, description FROM help_list WHERE name = '" + com + "' OR s_name = '" + com + "'"
@@ -228,9 +238,10 @@ class ConMySQL(object):
 if __name__ == '__main__':
 
     print ConMySQL.getLib({'name': 'rnc', 'type':'LOM'},'OR')
-    print ConMySQL.updateUser(os.environ['USER'])
     print ConMySQL.getLib({'name':'tam'})
     print ConMySQL.getUser(os.environ['USER'])
     print ConMySQL.getTypeByTree()
-    print ConMySQL.getKey()
-    print ConMySQL.getUniqueKey()
+    print ConMySQL.getKeys()
+    print ConMySQL.getUniqueKeys()
+    print ConMySQL.getNews(os.environ['USER'])
+    print ConMySQL.updateUser('ealatet')

@@ -164,11 +164,11 @@ SELECT p.id_type AS ID, p.type AS CHILDREN, s.type AS PARENT FROM types_list p J
 //
 
 CREATE VIEW VIEW_WAITING AS
-SELECT id, name, type, description, key_list, name_a, date_a, name_m, date_m, id_access FROM waiting_list NATURAL JOIN types_list;
+SELECT id, name, type, id_type, description, key_list, name_a, date_a, name_m, date_m, id_access FROM waiting_list NATURAL JOIN types_list;
 //
 
 CREATE VIEW VIEW_LIBRARY AS
-SELECT id, name, type, description, key_list, name_a, date_a, name_m, date_m, id_access FROM library_list NATURAL JOIN types_list;
+SELECT id, name, type, id_type, description, key_list, name_a, date_a, name_m, date_m, id_access FROM library_list NATURAL JOIN types_list;
 //
 
 /*----------------------------------

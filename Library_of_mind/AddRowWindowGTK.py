@@ -46,16 +46,16 @@ class AddRowWindowGTK:
         self.addDescription()
 
         #ComboBoxKey
-        keysData = ConMySQL.getUniqueKey()
+        keysData = ConMySQL.getUniqueKeys()
         self.addListKeyToComboBox(keysData)
 
-    def addRowToTreeView(self, typeData, parentName=(1,'LOM'), parent=None):
+    def addRowToTreeView(self, typeData, parentName=('LOM', 1), parent=None):
 
         if not typeData.get(parentName):
             return
         else:
             for child in typeData[parentName]:
-                newParent = self.treeStoreType.append(parent, [child[1],child[0]])
+                newParent = self.treeStoreType.append(parent, [child[0],child[1]])
                 if typeData.get(child):
                     self.addRowToTreeView(typeData, child, newParent)
 
