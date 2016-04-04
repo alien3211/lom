@@ -4,6 +4,7 @@
 from gi.repository import Gtk as gtk
 import log
 from MySQL import ConMySQL
+import os
 
 class AddRowWindowGTK:
 
@@ -12,7 +13,7 @@ class AddRowWindowGTK:
         self.user = user
 
         # Parse glade XML
-        self.gladefile = "Library_of_mind/AddRowGladeWindow.glade"
+        self.gladefile = os.path.dirname(os.path.abspath(__file__)) + "Library_of_mind/AddRowGladeWindow.glade"
         self.glade = gtk.Builder()
         self.glade.add_from_file(self.gladefile)
         self.glade.connect_signals(self)
@@ -117,7 +118,7 @@ class AddRowWindowGTK:
             if self.eType.get_text() != "":
                 typeNameToRow = self.eType.get_text()
         else:
-            return self.print_error_message("Select type")
+            dataRow['idType'] = 1
 
         if typeNameToRow and ConMySQL.getWhereTypeAndParent(typeNameToRow, dataRow['idType']):
             return self.print_error_message("NOT Unique Type!!")

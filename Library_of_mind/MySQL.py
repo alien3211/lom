@@ -11,7 +11,7 @@ class ConMySQL(object):
         data = []
         try:
 
-            db = MySQLdb.connect('localhost', 'lom', 'lom', 'LOM')
+            db = MySQLdb.connect('172.19.20.19', 'lom', 'lom', 'LOM')
 
             cur = db.cursor(MySQLdb.cursors.DictCursor)
             cur.execute(query)
@@ -34,7 +34,7 @@ class ConMySQL(object):
 
         try:
 
-            db = MySQLdb.connect('localhost', 'lom', 'lom', 'LOM')
+            db = MySQLdb.connect('172.19.20.19', 'lom', 'lom', 'LOM')
 
             cur = db.cursor()
             cur.execute(query)
@@ -173,9 +173,15 @@ class ConMySQL(object):
     def getNews(cls, user):
     	"""Get News from DB"""
 
-        duser = cls.getUser(user)[0]
+        duser = cls.getUser(user)
+	if len(duser) >= 1:
+	    duser = cls.getUser(user)[0]
+	    query = "SELECT * FROM VIEW_WAITING WHERE date_a > '" + duser['last_log'].strftime("%Y-%m-%d %T") + "'"
+	else:
+	    cls.updateUser(user)
+	    query = "SELECT * FROM VIEW_WAITING WHERE date_a < '1970-01-01 12:00:00'"
 
-        query = "SELECT * FROM VIEW_WAITING WHERE date_a > '" + duser['last_log'].strftime("%Y-%m-%d %T") + "'"
+
 
         return cls.__getData(query)
 

@@ -160,7 +160,7 @@ END;
 ----------------------------------*/
 
 CREATE VIEW TYPE_TREE AS
-SELECT p.id_type AS ID, p.type AS CHILDREN, s.type AS PARENT FROM types_list p JOIN types_list s ON p.id_parent = s.id_type;
+SELECT p.id_type AS ID, p.type AS CHILDREN, s.type AS PARENT, s.id_type AS ID_PARENT FROM types_list p JOIN types_list s ON p.id_parent = s.id_type;
 //
 
 CREATE VIEW VIEW_WAITING AS

@@ -6,7 +6,7 @@ import getopt
 from keycatch import *
 from ThreadWindow import ThreadWindow
 import log
-import os
+import sys
 
 list_keys = ['', 'left_shift', 'right_shift', 'left_ctrl', 'right_ctrl', 'left_alt', 'right_alt']
 
