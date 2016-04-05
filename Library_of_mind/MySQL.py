@@ -11,7 +11,7 @@ class ConMySQL(object):
         data = []
         try:
 
-            db = MySQLdb.connect('172.19.20.19', 'lom', 'lom', 'LOM')
+            db = MySQLdb.connect('localhost', 'lom', 'lom', 'LOM')
 
             cur = db.cursor(MySQLdb.cursors.DictCursor)
             cur.execute(query)
@@ -34,7 +34,7 @@ class ConMySQL(object):
 
         try:
 
-            db = MySQLdb.connect('172.19.20.19', 'lom', 'lom', 'LOM')
+            db = MySQLdb.connect('localhost', 'lom', 'lom', 'LOM')
 
             cur = db.cursor()
             cur.execute(query)

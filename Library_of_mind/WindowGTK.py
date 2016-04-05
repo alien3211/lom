@@ -70,6 +70,7 @@ class Window():
 
         for key, val in csv.reader(open(self.configData['lomrc'])):
             self.configData[key] = val
+            log.LOG("key['%s'] = %s" % (key, val))
 
         log.LOG("END  getConfig")
 
@@ -106,12 +107,12 @@ class Window():
 
         log.LOG("START  __set_position")
         (w, h) = self.window.get_size()
-        x = int(Gdk.Screen.get_default().get_width()*self.configData['x'])
-        y = int(Gdk.Screen.get_default().get_height()*self.configData['y'])
+        x = int(Gdk.Screen.get_default().get_width() * int(self.configData['x']))
+        y = int(Gdk.Screen.get_default().get_height() * int(self.configData['y']))
 
         #Set position Left-Button
-        self.window.move(x-w, y-h)
         log.LOG("(x,y) = (%s,%s)   (w,h) = (%s,%s)" % (x,y,w,h))
+        self.window.move(x-w, y-h)
 
         log.LOG("END  __set_position")
 
@@ -337,32 +338,32 @@ class Window():
                 for name in ['name', 'type', 'description', 'key_list', 'name_a']:
                     dPattern[name] = pattern
 
-        else:
-            while com:
-                k = com.pop(0)
-                if com:
-                    if k.lower() in ['-id', '-i']:
-                        checkRow(com, dPattern, 'id')
+            else:
+                while com:
+                    k = com.pop(0)
+                    if com:
+                        if k.lower() in ['-id', '-i']:
+                            checkRow(com, dPattern, 'id')
 
-                    elif k.lower() in ['-name','-n ']:
-                        checkRow(com, dPattern, 'name')
+                        elif k.lower() in ['-name','-n ']:
+                            checkRow(com, dPattern, 'name')
 
-                    elif k.lower() in ['-type', '-t']:
-                        checkRow(com, dPattern, 'type')
+                        elif k.lower() in ['-type', '-t']:
+                            checkRow(com, dPattern, 'type')
 
-                    elif k.lower() in ['-description', '-desc', '-d']:
-                        checkRow(com, dPattern, 'description')
+                        elif k.lower() in ['-description', '-desc', '-d']:
+                            checkRow(com, dPattern, 'description')
 
-                    elif k.lower() in ['-key', '-k']:
-                        checkRow(com, dPattern, 'key_list')
+                        elif k.lower() in ['-key', '-k']:
+                            checkRow(com, dPattern, 'key_list')
 
-                    elif k.lower() in ['-autor', '-a']:
-                        checkRow(com, dPattern, 'name_a')
+                        elif k.lower() in ['-autor', '-a']:
+                            checkRow(com, dPattern, 'name_a')
 
-                    elif k.lower() in ['-id_type', '-it']:
-                        checkRow(com, dPattern, 'id_type')
-                else:
-                    return self.print_error_message("Invalid syntax")
+                        elif k.lower() in ['-id_type', '-it']:
+                            checkRow(com, dPattern, 'id_type')
+                    else:
+                        return self.print_error_message("Invalid syntax")
 
 
         if dPattern:
@@ -515,9 +516,14 @@ class Window():
 
         if len(com) >= 2 and com[0] in self.configData.keys():
             self.configData[com[0]] = ' '.join(com)
+        elif not com:
+            self.getConfig()
+            message = ""
+            for k, v in self.configData.items():
+                message += "%s = %s\n" % (k, v)
+            self.labelLayout(message)
         else:
             self.print_error_message('INVALID SYNTAX')
-        print "############## ",self.configData
         self.setConfig()
 
         log.LOG("END setOption")
