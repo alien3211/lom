@@ -11,7 +11,7 @@ class ConMySQL(object):
         data = []
         try:
 
-            db = MySQLdb.connect('localhost', 'lom', 'lom', 'LOM')
+            db = MySQLdb.connect(ConMySQL.ip, 'lom', 'lom', 'LOM')
 
             cur = db.cursor(MySQLdb.cursors.DictCursor)
             cur.execute(query)
@@ -34,7 +34,7 @@ class ConMySQL(object):
 
         try:
 
-            db = MySQLdb.connect('localhost', 'lom', 'lom', 'LOM')
+            db = MySQLdb.connect(ConMySQL.ip, 'lom', 'lom', 'LOM')
 
             cur = db.cursor()
             cur.execute(query)
@@ -243,6 +243,7 @@ class ConMySQL(object):
 
 if __name__ == '__main__':
 
+    ConMySQL.ip = '172.19.20.19'
     print ConMySQL.getLib({'name': 'rnc', 'type':'LOM'},'OR')
     print ConMySQL.getLib({'name':'tam'})
     print ConMySQL.getUser(os.environ['USER'])

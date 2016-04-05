@@ -19,9 +19,15 @@ class Window():
         self.configData = configData
         self.configData['history'] = "~/.lom_history"
         self.configData['short'] = ['id', 'type', 'name', 'key_list']
+        self.configData['ip_MySQL'] = 'localhost'
         if not os.path.exists(self.configData['lomrc']):
             self.setConfig()
+
+	self.getConfig()
         self.component = {}
+
+	# Set MySQL IP
+	ConMySQL.ip = self.configData['ip_MySQL']
 
         # Parse glade XML
         self.gladefile = os.path.dirname(os.path.abspath(__file__)) + "/Library_of_mind/MainWindow.glade"
