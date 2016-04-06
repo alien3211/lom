@@ -195,5 +195,4 @@ INSERT INTO help_list(name, s_name, description) VALUES("news","n","");
 //
 
 
-
 delimiter ;

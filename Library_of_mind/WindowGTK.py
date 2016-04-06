@@ -134,10 +134,10 @@ class Window():
 
         log.LOG("END  initialWindow")
 
-    def __set_position(self):
+    def __set_position(self, width=WINDOW_WIDTH, height=WINDOW_HEIGHT):
 
         log.LOG("START  __set_position")
-        (w, h) = (WINDOW_WIDTH, WINDOW_HEIGHT)
+        (w, h) = width, height
         x = int(Gdk.Screen.get_default().get_width() * int(self.configData['x']))
         y = int(Gdk.Screen.get_default().get_height() * int(self.configData['y']))
 
@@ -311,8 +311,7 @@ class Window():
             if widget != None:
                 self.gridMain.remove(widget)
             self.labelLayout(text_row % tuple(model[iter][:]))
-
-        self.__set_position()
+        self.__set_position(WINDOW_WIDTH, WINDOW_HEIGHT + 200)
 
 
         log.LOG("END  getSelectedRow")
