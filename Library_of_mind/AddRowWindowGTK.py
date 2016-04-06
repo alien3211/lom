@@ -13,7 +13,7 @@ class AddRowWindowGTK:
         self.user = user
 
         # Parse glade XML
-        self.gladefile = os.path.dirname(os.path.abspath(__file__)) + "Library_of_mind/AddRowGladeWindow.glade"
+        self.gladefile = os.path.dirname(os.path.abspath(__file__)) + "/Library_of_mind/AddRowGladeWindow.glade"
         self.glade = gtk.Builder()
         self.glade.add_from_file(self.gladefile)
         self.glade.connect_signals(self)
@@ -61,7 +61,7 @@ class AddRowWindowGTK:
                     self.addRowToTreeView(typeData, child, newParent)
 
     def addDescription(self, desc = ""):
-        
+
         self.textBuffer.set_text(desc)
 
     def addListKeyToComboBox(self, keysData):
@@ -102,7 +102,7 @@ class AddRowWindowGTK:
         #check entry name
         if self.eName.get_text() in ["", "Unique name"]:
             return self.print_error_message()
-        
+
         dataRow['name'] = self.eName.get_text()
 
 
@@ -119,6 +119,8 @@ class AddRowWindowGTK:
                 typeNameToRow = self.eType.get_text()
         else:
             dataRow['idType'] = 1
+            if self.eType.get_text() != "":
+                typeNameToRow = self.eType.get_text()
 
         if typeNameToRow and ConMySQL.getWhereTypeAndParent(typeNameToRow, dataRow['idType']):
             return self.print_error_message("NOT Unique Type!!")
@@ -153,8 +155,11 @@ class AddRowWindowGTK:
 
         if dataRow['nameType']:
             ConMySQL.setType(dataRow['nameType'], dataRow['idType'])
+	    idNewType = ConMySQL.getWhereTypeAndParent(dataRow['nameType'], dataRow['idType'])[0]['id_type']
 
-        ConMySQL.setRow(dataRow['name'], dataRow['idType'], dataRow['description'], dataRow['keys'], self.user)
+            ConMySQL.setRow(dataRow['name'], idNewType, dataRow['description'], dataRow['keys'], self.user)
+	else:
+            ConMySQL.setRow(dataRow['name'], dataRow['idType'], dataRow['description'], dataRow['keys'], self.user)
 
         gtk.main_quit()
         self.window.destroy()

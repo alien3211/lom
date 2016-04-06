@@ -9,12 +9,37 @@ from AddRowWindowGTK import AddRowWindowGTK
 import csv
 import os
 
+def css():
+    css = b"""
+* {
+    transition-property: color, background-color, border-color, background-image, padding, border-width;
+    transition-duration: 1s;
+}
+GtkLabel:hover{
+color: yellow;
+}
+    """
+    style_provider = gtk.CssProvider()
+    style_provider.load_from_data(css)
+
+    gtk.StyleContext.add_provider_for_screen(
+    Gdk.Screen.get_default(),
+    style_provider,
+    gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+    )
+
+
+WINDOW_WIDTH  = 460
+WINDOW_HEIGHT = 244
+
+
 class Window():
 
     def __init__(self, configData={}):
 
         log.LOG("START  __init__")
 
+        css()
 
         self.configData = configData
         self.configData['history'] = "~/.lom_history"
@@ -37,11 +62,11 @@ class Window():
 
         # get object
         self.component['set'] = {}
-        self.component['search'] = gtk.ListStore(int, str, str, str)
+        self.component['search'] = gtk.ListStore(int, str, str, str, str, str, str)
         self.component['update'] = gtk.ListStore(int, str, str, str)
         self.component['add'] = {}
         self.component['type'] = gtk.TreeStore(str, int)
-        self.component['news'] = gtk.ListStore(int, str, str, str)
+        self.component['news'] = gtk.ListStore(int, str, str, str, str, str, str)
         self.component['keys'] = gtk.ListStore(str)
         self.window = self.glade.get_object("window")
         self.gridMain = self.glade.get_object("gridMain")
@@ -100,7 +125,7 @@ class Window():
 
         self.window.add_events(Gdk.EventMask.BUTTON_PRESS_MASK)
 
-        self.window.set_size_request(460,244)
+	self.window.set_gravity(Gdk.Gravity.SOUTH_EAST)
         self.window.set_keep_above(True)
         self.window.set_resizable(False)
         self.window.set_decorated(False)
@@ -112,7 +137,7 @@ class Window():
     def __set_position(self):
 
         log.LOG("START  __set_position")
-        (w, h) = self.window.get_size()
+        (w, h) = (WINDOW_WIDTH, WINDOW_HEIGHT)
         x = int(Gdk.Screen.get_default().get_width() * int(self.configData['x']))
         y = int(Gdk.Screen.get_default().get_height() * int(self.configData['y']))
 
@@ -189,9 +214,14 @@ class Window():
     def commonLayout(self):
 
         log.LOG("START  commonLayout")
+        self.window.set_size_request(WINDOW_WIDTH, WINDOW_HEIGHT)
 
         self.entryCommandLine.set_text("")
         widget = self.gridMain.get_child_at(0,1)
+        if widget != None:
+            self.gridMain.remove(widget)
+
+        widget = self.gridMain.get_child_at(0,2)
         if widget != None:
             self.gridMain.remove(widget)
 
@@ -211,11 +241,11 @@ class Window():
         sw.set_can_focus(True)
         sw.set_visible(True)
         sw.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.AUTOMATIC)
-        self.gridMain.attach(sw,0,1,1,1)
+        self.gridMain.attach(sw,0,2,1,1)
         log.LOG("(0,1): %s" % self.gridMain.get_child_at(0,1))
 
 
-        self.labelText = gtk.Label()
+        self.labelText = gtk.Label("")
         self.labelText.set_markup(text)
         self.labelText.set_visible(True)
         self.labelText.set_line_wrap(True)
@@ -230,12 +260,13 @@ class Window():
         log.LOG("END  labelLayout")
 
     def treeViewLayout(self, model, getSelectedRow):
-
-        log.LOG("START  treeViewLayout")
         """
         Create treeView
         model -> GTK Storage
         """
+
+        log.LOG("START  treeViewLayout")
+	self.commonLayout()
 
         log.LOG("Create Scroll")
         sw = gtk.ScrolledWindow()
@@ -264,6 +295,25 @@ class Window():
 
         log.LOG("START  getSelectedRow")
         log.LOG("widget= %s path= %s column= %s data=%s" % (self, widget, column, data))
+	text_row ="""
+<span>%d</span> <span color="#929287">Title: </span><span>%s</span>
+<span color="#929287">Name: </span><span>%s</span>
+<span color="#929287">Description:</span>\n
+      %s\n
+<span color="#929287">Keys: </span><span>%s</span>
+<span weight="bold">%s</span><span>%s</span>
+"""
+        selection = self.treeViewResult.get_selection()
+        result = selection.get_selected()
+        if result:
+            model, iter = result
+            widget = self.gridMain.get_child_at(0,2)
+            if widget != None:
+                self.gridMain.remove(widget)
+            self.labelLayout(text_row % tuple(model[iter][:]))
+
+        self.__set_position()
+
 
         log.LOG("END  getSelectedRow")
 
@@ -378,7 +428,7 @@ class Window():
             rows = ConMySQL.getLib()
 
         for row in rows:
-            toadd = [row['id'], row['type'], row['name'], row['key_list']]
+            toadd = [row['id'], row['type'], row['name'], row['key_list'], row['description'], row['name_a'], row['date_a'].strftime("%Y-%m-%d %T")]
             self.component['search'].append(toadd)
 
 
@@ -498,7 +548,7 @@ class Window():
         ConMySQL.updateUser(self.configData['user'])
 
         for row in rows:
-            toadd = [row['id'], row['type'], row['name'], row['key_list']]
+            toadd = [row['id'], row['type'], row['name'], row['key_list'], row['description'], row['name_a'], row['date_a'].strftime("%Y-%m-%d %T")]
             self.component['news'].append(toadd)
 
         # Create, TreeView Layout
