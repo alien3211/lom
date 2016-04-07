@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from gi.repository import Gtk as gtk
+from gi.repository import Gdk, Pango, Gio, GLib
 import log
 from MySQL import ConMySQL
 import os
@@ -30,6 +31,7 @@ class AddRowWindowGTK:
         self.comboBStoreKey = self.glade.get_object("liststoreKey")
         self.treeVKeys = self.glade.get_object("treeviewKeys")
         self.treeVStoreKeys = self.glade.get_object("liststoreTreeKeys")
+        self.labelInfoMarkup = self.glade.get_object("labelInfo")
 
         # initial text
         self.initialText()
@@ -46,9 +48,25 @@ class AddRowWindowGTK:
         # TextView description
         self.addDescription()
 
-        #ComboBoxKey
+        # ComboBoxKey
         keysData = ConMySQL.getUniqueKeys()
         self.addListKeyToComboBox(keysData)
+
+        # TextBuffer
+        self.textBuffer.connect("changed", self.textChanged, provider)
+
+    def textChanged(self, buffer, provider):
+
+        start = buffer.get_start_iter()
+        end = buffer.get_end_iter()
+        buffer.remove_all_tags(start, end)
+
+        text = buffer.get_text(start, end, False).encode('utf-8')
+        self.labelInfoMarkup.set_markup(text)
+
+
+        gtk.StyleContext.reset_widgets(Gdk.Screen.get_default())
+
 
     def addRowToTreeView(self, typeData, parentName=('LOM', 1), parent=None):
 
