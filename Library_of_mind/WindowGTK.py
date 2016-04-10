@@ -8,6 +8,7 @@ from MySQL import ConMySQL
 from AddRowWindowGTK import AddRowWindowGTK
 import csv
 import os
+from collections import deque
 
 def css():
     css = b"""
@@ -41,15 +42,21 @@ class Window():
 
         css()
 
+        # set config data
         self.configData = configData
-        self.configData['history'] = "~/.lom_history"
+        self.configData['history_file'] = os.path.expanduser("~") + "/.lom_history"
+        self.configData['history'] = 3000
         self.configData['short'] = ['id', 'type', 'name', 'key_list']
         self.configData['ip_MySQL'] = 'localhost'
+
         if not os.path.exists(self.configData['lomrc']):
             self.setConfig()
 
+        if not os.path.exists(self.configData['history_file']):
+            with open(self.configData['history_file'], 'wb') as f:
+                f.write("")
+
 	self.getConfig()
-        self.component = {}
 
 	# Set MySQL IP
 	ConMySQL.ip = self.configData['ip_MySQL']
@@ -61,6 +68,7 @@ class Window():
         self.glade.connect_signals(self)
 
         # get object
+        self.component = {}
         self.component['set'] = {}
         self.component['search'] = gtk.ListStore(int, str, str, str, str, str, str)
         self.component['update'] = gtk.ListStore(int, str, str, str)
@@ -68,11 +76,17 @@ class Window():
         self.component['type'] = gtk.TreeStore(str, int)
         self.component['news'] = gtk.ListStore(int, str, str, str, str, str, str)
         self.component['keys'] = gtk.ListStore(str)
+        self.component['history'] = gtk.ListStore(int, str)
         self.window = self.glade.get_object("window")
         self.gridMain = self.glade.get_object("gridMain")
         self.entryCommandLine = self.glade.get_object("entryCommandLine")
         self.labelText = None
         self.treeViewResult = None
+
+        # set up history command
+        self.history = deque(maxlen=int(self.configData['history']))
+        self.histpos = 0
+        self.getHisoryFromFile()
 
         # initial window
         self.initialWindow()
@@ -130,6 +144,8 @@ class Window():
         self.window.set_resizable(False)
         self.window.set_decorated(False)
 
+        self.entryCommandLine.connect('key_press_event', self.__key_function)
+
         self.commonLayout()
 
         log.LOG("END  initialWindow")
@@ -146,6 +162,76 @@ class Window():
         self.window.move(x-w, y-h)
 
         log.LOG("END  __set_position")
+
+    def __key_function(self, entry, event):
+
+        log.LOG("START __key_function")
+        if event.keyval == Gdk.KEY_Return:
+
+            self.entryCommandLine.emit_stop_by_name('key_press_event')
+            print "KEY_Return"
+
+        elif event.keyval in (Gdk.KEY_KP_Up, Gdk.KEY_Up, Gdk.KEY_Page_Up):
+
+            self.entryCommandLine.emit_stop_by_name('key_press_event')
+            print "KEY_Up"
+
+            self.historyUp()
+
+        elif event.keyval in (Gdk.KEY_KP_Down, Gdk.KEY_Down, Gdk.KEY_Page_Down):
+
+            self.entryCommandLine.emit_stop_by_name('key_press_event')
+            print "KEY_Down"
+
+            self.historyDown()
+
+        elif event.keyval in (Gdk.KEY_D, Gdk.KEY_d) and\
+                event.state & Gdk.ModifierType.CONTROL_MASK:
+
+            self.entryCommandLine.emit_stop_by_name('key_press_event')
+            gtk.main_quit()
+            self.window.destroy()
+
+
+        log.LOG("END __key_function")
+
+
+    def historyDown(self):
+
+        log.LOG("START historyUp")
+
+
+        if self.histpos > 0:
+            self.entryCommandLine.set_text(self.history[self.histpos])
+            self.histpos = self.histpos - 1
+
+        log.LOG("END historyUp")
+
+
+    def historyUp(self):
+
+        log.LOG("START historyDown")
+
+
+        if self.histpos < len(self.history) - 1:
+            self.entryCommandLine.set_text(self.history[self.histpos])
+            self.histpos = self.histpos + 1
+
+        log.LOG("END historyDown")
+
+
+    def setHisoryFile(self):
+
+        with open(self.configData['history_file'], 'w') as f:
+            f.write('\n'.join(self.history))
+
+    def getHisoryFromFile(self):
+
+        with open(self.configData['history_file'], 'r') as f:
+            self.history = deque(maxlen=int(self.configData['history']))
+            for row in f.read().split('\n'):
+                self.history.append(row)
+                print row
 
     def print_error_message(self, text="fill all fields"):
 
@@ -181,6 +267,9 @@ class Window():
 
         arg = widget.get_text()
         rest = arg.split()
+        if rest:
+            self.history.appendleft(arg)
+        self.histpos = 0
         command = rest.pop(0) if rest else ""
 
         self.commonLayout()
@@ -202,7 +291,10 @@ class Window():
             self.getKeysList(rest)
         elif command in ['news', 'n']:
             self.getNews()
+        elif command in ['his', 'history']:
+            self.getHisory()
         elif command in ['exit', 'bye']:
+            self.setHisoryFile()
             gtk.main_quit()
             self.window.destroy()
         elif command.isdigit():
@@ -558,10 +650,29 @@ class Window():
 
         log.LOG("END  getNews")
 
-    def getDigit(com):
+    def getDigit(self):
 
         log.LOG("START  getDigit")
         pass
+
+        log.LOG("END  getDigit")
+
+    def getHisory(self):
+
+        log.LOG("START  getDigit")
+
+        # clean TreeStore
+        self.component['history'].clear()
+
+        for row in enumerate(self.history):
+            self.component['history'].append(row)
+
+
+        # Create, TreeView Layout
+        self.treeViewLayout(self.component['history'], self.getSelectedRowKey)
+
+        # create columns
+        self.createColumns(self.treeViewResult, ['ID','History'])
 
         log.LOG("END  getDigit")
 
