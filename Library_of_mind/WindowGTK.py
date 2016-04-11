@@ -15,10 +15,36 @@ def css():
 * {
     transition-property: color, background-color, border-color, background-image, padding, border-width;
     transition-duration: 1s;
+  }
+/* font operate on entire GtkTreeView not for selected row */
+GtkTreeView {
+text-shadow: 1px 1px 2px black, 0 0 1em blue, 0 0 0.2em blue;
+color: white;
+font: 1.5em Georgia, "Bitstream Charter", "URW Bookman L", "Century Schoolbook L", serif;
+font-weight: bold;
+font-style: italic;box-shadow: 5px 3px red;}
+GtkTreeView row:nth-child(even) {
+background-image: -gtk-gradient (linear,
+left top,
+left bottom,
+from (#d0e4f7),
+color-stop (0.5, darker (#d0e4f7)),
+to (#fdffff));
 }
-GtkLabel:hover{
-color: yellow;
+GtkTreeView row:nth-child(odd) {
+background-image: -gtk-gradient (linear,
+left top,
+left bottom,
+from (yellow),
+color-stop (0.5, darker (yellow)),
+to (#fdffff));
 }
+/* next line only border action operate */
+GtkTreeView:selected{color: white; background: green; border-width: 1px; border-color: black;}
+/* next line for Gtk.TreeViewColumn */
+column-header .button{color: white; background: purple;}
+
+
     """
     style_provider = gtk.CssProvider()
     style_provider.load_from_data(css)
@@ -39,8 +65,6 @@ class Window():
     def __init__(self, configData={}):
 
         log.LOG("START  __init__")
-
-        css()
 
         # set config data
         self.configData = configData
@@ -169,20 +193,15 @@ class Window():
         if event.keyval == Gdk.KEY_Return:
 
             self.entryCommandLine.emit_stop_by_name('key_press_event')
-            print "KEY_Return"
 
         elif event.keyval in (Gdk.KEY_KP_Up, Gdk.KEY_Up, Gdk.KEY_Page_Up):
 
             self.entryCommandLine.emit_stop_by_name('key_press_event')
-            print "KEY_Up"
-
             self.historyUp()
 
         elif event.keyval in (Gdk.KEY_KP_Down, Gdk.KEY_Down, Gdk.KEY_Page_Down):
 
             self.entryCommandLine.emit_stop_by_name('key_press_event')
-            print "KEY_Down"
-
             self.historyDown()
 
         elif event.keyval in (Gdk.KEY_D, Gdk.KEY_d) and\
@@ -231,7 +250,6 @@ class Window():
             self.history = deque(maxlen=int(self.configData['history']))
             for row in f.read().split('\n'):
                 self.history.append(row)
-                print row
 
     def print_error_message(self, text="fill all fields"):
 
@@ -267,9 +285,9 @@ class Window():
 
         arg = widget.get_text()
         rest = arg.split()
-        if rest:
-            self.history.appendleft(arg)
         self.histpos = 0
+        if rest and '\n' not in rest:
+            self.history.appendleft(arg)
         command = rest.pop(0) if rest else ""
 
         self.commonLayout()
@@ -437,18 +455,36 @@ class Window():
 
         log.LOG("END  getSelectedRowKey")
 
+    def getSelectedHis(self, widget, column, data):
+
+        log.LOG("START getSelectedHis")
+        log.LOG("widget= %s path= %s column= %s data=%s" % (self, widget, column, data))
+        selection = self.treeViewResult.get_selection()
+        result = selection.get_selected()
+        if result:
+            model, iter = result
+            self.commonLayout()
+            self.entryCommandLine.set_text(str(model.get_value(iter, 1)))
+	    self.parserArgs(self.entryCommandLine)
+
+        log.LOG("END getSelectedHis")
+
     def getHelp(self, com):
 
         log.LOG("START  getHelp")
 
         if com:
-            helpList = ConMySQL.getHelp(' '.join(com))
-            helpList = '<span color="red">INVALID SYNTAX</span>\n' + helpList[0]['description']
+            helpList = ConMySQL.getHelp(' '.join(com))[0]
+	    if helpList['name'] == 'ALL':
+                helpList = '<span color="red">INVALID SYNTAX</span>\n' + helpList['description']
+            else:
+                helpList = helpList['description']
+	        
             log.LOG("#### %s" % helpList)
             self.labelLayout(helpList)
         else:
-            helpList = ConMySQL.getHelp()
-            helpList = helpList[0]['description']
+            helpList = ConMySQL.getHelp()[0]
+            helpList = helpList['description']
             self.labelLayout(helpList)
 
 
@@ -585,6 +621,7 @@ class Window():
             column.set_sort_indicator(True)
             column.set_sort_column_id(0)
             treeView.append_column(column)
+	    treeView.expand_all()
 
 
         log.LOG("END  createColumns")
@@ -669,7 +706,7 @@ class Window():
 
 
         # Create, TreeView Layout
-        self.treeViewLayout(self.component['history'], self.getSelectedRowKey)
+        self.treeViewLayout(self.component['history'], self.getSelectedHis)
 
         # create columns
         self.createColumns(self.treeViewResult, ['ID','History'])

@@ -53,9 +53,9 @@ class AddRowWindowGTK:
         self.addListKeyToComboBox(keysData)
 
         # TextBuffer
-        self.textBuffer.connect("changed", self.textChanged, provider)
+        self.textBuffer.connect("changed", self.textChanged)
 
-    def textChanged(self, buffer, provider):
+    def textChanged(self, buffer):
 
         start = buffer.get_start_iter()
         end = buffer.get_end_iter()
