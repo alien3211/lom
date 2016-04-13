@@ -44,6 +44,9 @@ GtkTreeView:selected{color: white; background: green; border-width: 1px; border-
 /* next line for Gtk.TreeViewColumn */
 column-header .button{color: white; background: purple;}
 
+* {
+    -GtkWindow-resize-grip-default: false;
+}
 
     """
     style_provider = gtk.CssProvider()
@@ -369,7 +372,7 @@ class Window():
 
         log.LOG("END  labelLayout")
 
-    def treeViewLayout(self, model, getSelectedRow):
+    def treeViewLayout(self, model, getSelectedRow, search_col=0):
         """
         Create treeView
         model -> GTK Storage
@@ -393,7 +396,7 @@ class Window():
         self.treeViewResult.set_visible(True)
         self.treeViewResult.set_can_focus(True)
         self.treeViewResult.set_model(model)
-        self.treeViewResult.set_search_column(0)
+        self.treeViewResult.set_search_column(search_col)
         self.treeViewResult.connect("row-activated", getSelectedRow)
         sw.add(self.treeViewResult)
 
@@ -406,12 +409,12 @@ class Window():
         log.LOG("START  getSelectedRow")
         log.LOG("widget= %s path= %s column= %s data=%s" % (self, widget, column, data))
 	text_row ="""
-<span>%d</span> <span color="#929287">Title: </span><span>%s</span>
-<span color="#929287">Name: </span><span>%s</span>
+<span color="#929287">Title: </span><span>{1}</span>
+<span color="#929287">Name: </span><span>{2}</span>
 <span color="#929287">Description:</span>\n
-      %s\n
-<span color="#929287">Keys: </span><span>%s</span>
-<span weight="bold">%s</span><span>%s</span>
+<span>{4}</span>\n
+<span color="#929287">Keys: </span><span>{3}</span>
+<span color="#929287">Autor: </span><span weight="bold">{5}</span>\t<span color="#929287">Date: </span><span>{6}</span>
 """
         selection = self.treeViewResult.get_selection()
         result = selection.get_selected()
@@ -420,8 +423,8 @@ class Window():
             widget = self.gridMain.get_child_at(0,2)
             if widget != None:
                 self.gridMain.remove(widget)
-            self.labelLayout(text_row % tuple(model[iter][:]))
-        self.__set_position(WINDOW_WIDTH, WINDOW_HEIGHT + 200)
+            self.labelLayout(text_row.format(*model[iter]))
+        self.__set_position(WINDOW_WIDTH, WINDOW_HEIGHT)
 
 
         log.LOG("END  getSelectedRow")
@@ -560,7 +563,7 @@ class Window():
 
 
         # Create, TreeView Layout
-        self.treeViewLayout(self.component['search'], self.getSelectedRow)
+        self.treeViewLayout(self.component['search'], self.getSelectedRow, 2)
 
         # create columns
         self.createColumns(self.treeViewResult, ['ID', 'Title', 'Name', 'Keys'])
@@ -680,7 +683,7 @@ class Window():
             self.component['news'].append(toadd)
 
         # Create, TreeView Layout
-        self.treeViewLayout(self.component['news'], self.getSelectedRow)
+        self.treeViewLayout(self.component['news'], self.getSelectedRow, 2)
 
         # create columns
         self.createColumns(self.treeViewResult, ['ID', 'Title', 'Name', 'Keys'])
@@ -706,7 +709,7 @@ class Window():
 
 
         # Create, TreeView Layout
-        self.treeViewLayout(self.component['history'], self.getSelectedHis)
+        self.treeViewLayout(self.component['history'], self.getSelectedHis, 1)
 
         # create columns
         self.createColumns(self.treeViewResult, ['ID','History'])
