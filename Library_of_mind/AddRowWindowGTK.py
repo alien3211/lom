@@ -44,6 +44,7 @@ class AddRowWindowGTK:
         # TreeViewType
         typeData = ConMySQL.getTypeByTree()
         self.addRowToTreeView(typeData)
+	self.treeVType.expand_all()
 
         # TextView description
         self.addDescription()

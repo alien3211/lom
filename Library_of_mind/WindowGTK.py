@@ -574,7 +574,7 @@ class Window():
     def addRecord(self,com):
 
         log.LOG("START  addRecord")
-        gtkWindowAddRow = AddRowWindowGTK('pi')
+        gtkWindowAddRow = AddRowWindowGTK(self.configData['user'])
         gtkWindowAddRow.main()
 
         log.LOG("END  addRecord")
