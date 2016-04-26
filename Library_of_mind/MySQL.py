@@ -236,6 +236,8 @@ class ConMySQL(object):
 	befor_update = cls.getUser(user)
 	if not befor_update:
 	    cls.setUser(user)
+	    query_add_type="INSERT INTO types_list(type, id_parent) SELECT '" + user + "', id_type from types_list where type = 'Users' and id_parent = 1;"
+            cls.__setData(query_add_type)
         query_last_log = "UPDATE users_list SET last_log = NOW() where user = '" + user + "'"
 
         cls.__setData(query_last_log)

@@ -215,6 +215,18 @@ INSERT INTO types_list(id_type, type, id_parent) VALUES(19,"RaspberryPi",5);
 //
 INSERT INTO types_list(id_type, type, id_parent) VALUES(20,"Project",19);
 //
+INSERT INTO types_list(id_type, type, id_parent) VALUES(21,"Users",1);
+//
+INSERT INTO types_list(id_type, type, id_parent) VALUES(22,"Python",13);
+//
+INSERT INTO types_list(id_type, type, id_parent) VALUES(23,"Framework",22);
+//
+INSERT INTO types_list(id_type, type, id_parent) VALUES(24,"GUI",22);
+//
+INSERT INTO types_list(id_type, type, id_parent) VALUES(25,"Tips & Tricks",22);
+//
+INSERT INTO types_list(id_type, type, id_parent) VALUES(26,"Project",22);
+//
 
 
 INSERT INTO help_list(name, s_name, description) VALUES("ALL","","<tt>Usage:
