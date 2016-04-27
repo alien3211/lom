@@ -73,8 +73,8 @@ class Window():
         self.configData = configData
         self.configData['history_file'] = os.path.expanduser("~") + "/.lom_history"
         self.configData['history'] = 3000
-        self.configData['short'] = ['id', 'type', 'name', 'key_list']
-        self.configData['ip_MySQL'] = 'localhost'
+        self.configData['short'] = ['ID', 'Title', 'Name', 'Keys']
+        self.configData['ip_MySQL'] = '172.19.20.19'
 
         if not os.path.exists(self.configData['lomrc']):
             self.setConfig()
@@ -89,7 +89,7 @@ class Window():
 	ConMySQL.ip = self.configData['ip_MySQL']
 
         # Parse glade XML
-        self.gladefile = os.path.dirname(os.path.abspath(__file__)) + "/Library_of_mind/MainWindow.glade"
+        self.gladefile = os.path.dirname(os.path.abspath(__file__)) + "/glade/MainWindow.glade"
         self.glade = gtk.Builder()
         self.glade.add_from_file(self.gladefile)
         self.glade.connect_signals(self)
@@ -130,9 +130,12 @@ class Window():
 
         log.LOG("START  setConfig")
 
-        w = csv.writer(open(self.configData['lomrc'], 'w'))
-        for key, val in self.configData.items():
-            w.writerow([key,val])
+	tmp = self.configData
+	tmp['short'] = ' '.join(tmp['short'])
+	with open(self.configData['lomrc'], 'wb') as csvfile:
+	    writer = csv.DictWriter(csvfile, tmp.keys())
+	    writer.writeheader()
+	    writer.writerow(tmp)
 
         log.LOG("END  setConfig")
 
@@ -140,9 +143,11 @@ class Window():
 
         log.LOG("START  getConfig")
 
-        for key, val in csv.reader(open(self.configData['lomrc'])):
-            self.configData[key] = val
-            log.LOG("key['%s'] = %s" % (key, val))
+	with open(self.configData['lomrc']) as csvfile:
+	    reader = csv.DictReader(csvfile)
+	    for row in reader:
+	      self.configData = row
+	self.configData['short'] = self.configData['short'].split()
 
         log.LOG("END  getConfig")
 
@@ -566,7 +571,7 @@ class Window():
         self.treeViewLayout(self.component['search'], self.getSelectedRow, 2)
 
         # create columns
-        self.createColumns(self.treeViewResult, ['ID', 'Title', 'Name', 'Keys'])
+        self.createColumns(self.treeViewResult, self.mapColumnNameToNumber(self.configData['short']))
 
         log.LOG("END  search")
 
@@ -607,7 +612,7 @@ class Window():
         self.treeViewLayout(self.component['type'], self.getSelectedRowType)
 
         # create columns
-        self.createColumns(self.treeViewResult, ['Type'])
+        self.createColumns(self.treeViewResult, [(0, 'Type')])
 
         log.LOG("END getType")
 
@@ -617,7 +622,7 @@ class Window():
 
         log.LOG("START  createColumns")
 
-        for i, name in enumerate(listColumnName):
+        for i, name in listColumnName:
             rendererText = gtk.CellRendererText()
             column = gtk.TreeViewColumn(name, rendererText, text=i)
             column.set_clickable(True)
@@ -664,9 +669,23 @@ class Window():
         self.treeViewLayout(self.component['keys'], self.getSelectedRowKey)
 
         # create columns
-        self.createColumns(self.treeViewResult, ['keys'])
+        self.createColumns(self.treeViewResult, [(0, 'keys')])
 
         log.LOG("END  getKeysList")
+
+    def mapColumnNameToNumber(self, nameList):
+       
+        mapNumber = {
+		'ID' : 0,
+		'Title' : 1,
+		'Name' : 2,
+		'Keys' : 3,
+		'Description' : 4,
+		'name_a' : 5,
+		'data_a' : 6}
+	
+        
+	return [(mapNumber[x], x) for x in nameList if x in mapNumber.keys()]
 
     def getNews(self):
 
@@ -686,7 +705,7 @@ class Window():
         self.treeViewLayout(self.component['news'], self.getSelectedRow, 2)
 
         # create columns
-        self.createColumns(self.treeViewResult, ['ID', 'Title', 'Name', 'Keys'])
+        self.createColumns(self.treeViewResult, self.mapColumnNameToNumber(self.configData['short']))
 
         log.LOG("END  getNews")
 
@@ -712,7 +731,7 @@ class Window():
         self.treeViewLayout(self.component['history'], self.getSelectedHis, 1)
 
         # create columns
-        self.createColumns(self.treeViewResult, ['ID','History'])
+        self.createColumns(self.treeViewResult, [(0, 'ID'),(1, 'History')])
 
         log.LOG("END  getDigit")
 

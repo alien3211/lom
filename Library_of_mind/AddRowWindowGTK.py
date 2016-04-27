@@ -14,7 +14,7 @@ class AddRowWindowGTK:
         self.user = user
 
         # Parse glade XML
-        self.gladefile = os.path.dirname(os.path.abspath(__file__)) + "/Library_of_mind/AddRowGladeWindow.glade"
+        self.gladefile = os.path.dirname(os.path.abspath(__file__)) + "/glade/AddRowGladeWindow.glade"
         self.glade = gtk.Builder()
         self.glade.add_from_file(self.gladefile)
         self.glade.connect_signals(self)
