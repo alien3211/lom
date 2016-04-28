@@ -8,6 +8,8 @@ from ThreadWindow import ThreadWindow
 import log
 import sys
 
+sys.path.append('/afs/ericpol.int/home/a/l/alte/pub/.my_lib')
+
 list_keys = ['', 'left_shift', 'right_shift', 'left_ctrl', 'right_ctrl', 'left_alt', 'right_alt']
 
 glkey = 'left_alt'

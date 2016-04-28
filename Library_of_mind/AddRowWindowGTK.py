@@ -33,6 +33,10 @@ class AddRowWindowGTK:
         self.treeVStoreKeys = self.glade.get_object("liststoreTreeKeys")
         self.labelInfoMarkup = self.glade.get_object("labelInfo")
 
+
+
+
+
         # initial text
         self.initialText()
 
@@ -63,7 +67,7 @@ class AddRowWindowGTK:
         buffer.remove_all_tags(start, end)
 
         text = buffer.get_text(start, end, False).encode('utf-8')
-        self.labelInfoMarkup.set_markup(text)
+        self.labelInfoMarkup.set_markup(escape(text))
 
 
         gtk.StyleContext.reset_widgets(Gdk.Screen.get_default())
@@ -195,8 +199,18 @@ class AddRowWindowGTK:
     def main(self):
         gtk.main()
 
+def escape(s):
+    "escape html markup"
+    if isinstance(s, str):
+        s = s.replace("&", "&amp;")
+        s = s.replace("\<", "&lt;")
+        s = s.replace("\>", "&gt;")
+
+    return s
+
 if __name__ == "__main__":
     try:
+
         gtkWindow = AddRowWindowGTK('pi')
         gtkWindow.main()
     except KeyboardInterrupt:

@@ -6,7 +6,7 @@ import os
 class ConMySQL(object):
 
     @classmethod
-    def __getData(cls, query):
+    def __getData(cls, query, *arg):
 
         data = []
         try:
@@ -14,7 +14,7 @@ class ConMySQL(object):
             db = MySQLdb.connect(ConMySQL.ip, 'lom', 'lom', 'LOM')
 
             cur = db.cursor(MySQLdb.cursors.DictCursor)
-            cur.execute(query)
+            cur.execute(query, arg)
             data = cur.fetchallDict()
 
         except MySQLdb.Error, e:
@@ -30,14 +30,14 @@ class ConMySQL(object):
             return data
 
     @classmethod
-    def __setData(cls, query):
+    def __setData(cls, query, *arg):
 
         try:
 
             db = MySQLdb.connect(ConMySQL.ip, 'lom', 'lom', 'LOM')
 
             cur = db.cursor()
-            cur.execute(query)
+            cur.execute(query, arg)
             db.commit()
 
         except MySQLdb.Error, e:
@@ -58,8 +58,8 @@ class ConMySQL(object):
     Get Types from DB by pattern
     pattern -> regexp"""
 
-        query = "SELECT * FROM types_list where type REGEXP '" + pattern + "'"
-        return cls.__getData(query)
+        query = "SELECT * FROM types_list where type REGEXP %s"
+        return cls.__getData(query, pattern)
 
 
     @classmethod
@@ -69,8 +69,8 @@ class ConMySQL(object):
     text -> text
     id_parent -> int"""
 
-        query = "SELECT * FROM types_list where type = '" + text + "' AND id_parent = " + str(id_parent)
-        return cls.__getData(query)
+        query = "SELECT * FROM types_list where type =%s AND id_parent =%s"
+        return cls.__getData(query, text, id_parent)
 
     @classmethod
     def getTypeByTree(cls, pattern=".*"):
@@ -78,8 +78,8 @@ class ConMySQL(object):
     Get Types tree from DB by pattern
     pattern -> regexp"""
 
-        query = "SELECT ID, CHILDREN, ID_PARENT, PARENT FROM TYPE_TREE where PARENT REGEXP '" + pattern + "'"
-        treeData = cls.__getData(query)
+        query = "SELECT ID, CHILDREN, ID_PARENT, PARENT FROM TYPE_TREE where PARENT REGEXP %s"
+        treeData = cls.__getData(query, pattern)
 
         result = {('LOM', 1L): []}
 
@@ -101,8 +101,8 @@ class ConMySQL(object):
     Get Keys from DB by pattern
     pattern -> regexp"""
 
-        query = "SELECT * FROM keys_list where key_name REGEXP '" + pattern + "'"
-        return cls.__getData(query)
+        query = "SELECT * FROM keys_list where key_name REGEXP %s"
+        return cls.__getData(query, pattern)
 
     @classmethod
     def getUniqueKeys(cls, pattern=".*"):
@@ -110,8 +110,8 @@ class ConMySQL(object):
     Get unique Keys from DB by pattern
     pattern -> regexp"""
 
-        query = "SELECT DISTINCT key_name FROM keys_list where key_name REGEXP '" + pattern + "'"
-        return cls.__getData(query)
+        query = "SELECT DISTINCT key_name FROM keys_list where key_name REGEXP %s"
+        return cls.__getData(query, pattern)
 
     @classmethod
     def getRowByKey(cls, pattern=".*"):
@@ -119,8 +119,8 @@ class ConMySQL(object):
     Get row from DB by pattern key
     pattern -> regexp(key)"""
 
-        query = "call show_rows_by_key('" + pattern + "')"
-        return cls.__getData(query)
+        query = "call show_rows_by_key(%s)"
+        return cls.__getData(query, pattern)
 
     @classmethod
     def getLib(cls, dictPattern={'id':'.*'}, oper='OR', access='ALL'):
@@ -133,14 +133,14 @@ class ConMySQL(object):
 	SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
     access -> str ['All', [$USER]]"""
 
-        query = "SELECT * FROM VIEW_WAITING where id_access = '" + access + "' AND "
+        query = "SELECT * FROM VIEW_WAITING where id_access = %s AND "
 
         tmp = []
         for (k,v) in dictPattern.items():
-            tmp.append(" %s REGEXP '%s' " % (k,v))
+            tmp.append(" %s REGEXP '%s' " % (MySQLdb.escape_string(k), MySQLdb.escape_string(str(v))))
         query += oper.join(tmp)
 
-        return cls.__getData(query)
+        return cls.__getData(query, access)
 
     @classmethod
     def getWeit(cls, dictPattern={'id':'.*'}, oper='OR', access='ALL'):
@@ -153,21 +153,21 @@ class ConMySQL(object):
 	SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
     access -> str ['All', [$USER]]"""
 
-        query = "SELECT * FROM VIEW_WAITING where id_access = '" + access + "' AND "
+        query = "SELECT * FROM VIEW_WAITING where id_access = %s AND "
 
         tmp = []
         for (k,v) in dictPattern.items():
-            tmp.append(" %s REGEXP '%s' " % (k,v))
+            tmp.append(" %s REGEXP '%s' " % (MySQLdb.escape_string(k), MySQLdb.escape_string(v)))
         query += oper.join(tmp)
 
-        return cls.__getData(query)
+        return cls.__getData(query, access)
 
     @classmethod
     def getUser(cls, user):
     	"""Get User from DB"""
 
-        query = "SELECT * FROM users_list where user = '" + user + "'"
-        return cls.__getData(query)
+        query = "SELECT * FROM users_list where user = %s"
+        return cls.__getData(query, user)
 
     @classmethod
     def getNews(cls, user):
@@ -189,8 +189,8 @@ class ConMySQL(object):
     def getHelp(cls, com='ALL'):
     	"""Get Help from DB"""
 
-        query = "SELECT name, s_name, description FROM help_list WHERE name = '" + com + "' OR s_name = '" + com + "'"
-        help = cls.__getData(query)
+        query = "SELECT name, s_name, description FROM help_list WHERE name =%s OR s_name =%s'"
+        help = cls.__getData(query, com)
 
 	if help:
 	    return help
@@ -204,15 +204,15 @@ class ConMySQL(object):
     name -> str
     parent -> id_type"""
 
-        query = "INSERT INTO types_list(type, id_parent) VALUES('" + name + "'," + str(parent) + ")"
-        cls.__setData(query)
+        query = "INSERT INTO types_list(type, id_parent) VALUES(%s, %s)"
+        cls.__setData(query, name, parent)
 
     @classmethod
     def setUser(cls, user):
     	"""Add new user"""
 
-        query = "INSERT INTO users_list(user) VALUES('" + user + "')"
-        cls.__setData(query)
+        query = "INSERT INTO users_list(user) VALUES(%s)"
+        cls.__setData(query, user)
 
     @classmethod
     def setRow(cls, name, id_type, description, key_list, user, access='ALL'):
@@ -226,8 +226,8 @@ class ConMySQL(object):
     access -> str ['All', [$USER]]"""
 
         query = "INSERT INTO waiting_list(name, id_type, id_access, description, key_list, name_a) \
-                VALUES('%s', %s, '%s', '%s', '%s', '%s')" % (name, id_type, access, description, key_list.replace(' ',''), user)
-        cls.__setData(query)
+                VALUES(%s, %s, %s, %s, %s, %s)"
+        cls.__setData(query, name, id_type, access, description, key_list.replace(' ',''), user)
 
     @classmethod
     def updateUser(cls, user):
@@ -236,21 +236,22 @@ class ConMySQL(object):
 	befor_update = cls.getUser(user)
 	if not befor_update:
 	    cls.setUser(user)
-	    query_add_type="INSERT INTO types_list(type, id_parent) SELECT '" + user + "', id_type from types_list where type = 'Users' and id_parent = 1;"
-            cls.__setData(query_add_type)
-        query_last_log = "UPDATE users_list SET last_log = NOW() where user = '" + user + "'"
+	    query_add_type="INSERT INTO types_list(type, id_parent) SELECT %s, id_type from types_list where type = 'Users' and id_parent = 1;"
+            cls.__setData(query_add_type, user)
+        query_last_log = "UPDATE users_list SET last_log = NOW() where user = %s"
 
-        cls.__setData(query_last_log)
+        cls.__setData(query_last_log, user)
         return befor_update
 
 if __name__ == '__main__':
 
     ConMySQL.ip = '172.19.20.19'
-    print ConMySQL.getLib({'name': 'rnc', 'type':'LOM'},'OR')
-    print ConMySQL.getLib({'name':'tam'})
-    print ConMySQL.getUser(os.environ['USER'])
-    print ConMySQL.getTypeByTree()
-    print ConMySQL.getKeys()
-    print ConMySQL.getUniqueKeys()
-    print ConMySQL.getNews(os.environ['USER'])
-    print ConMySQL.updateUser('ealatet')
+    #print ConMySQL.getHelp('ps aux | sort -n -k 6 | awk \'{sum += $6/1024; print $6/1024 " MB\t\t" $11} END {print "Total " sum " MB"}\'')
+    #print ConMySQL.getLib({'name': 'rnc', 'type':'LOM'},'OR')
+    #print ConMySQL.getLib({'name':'tam'})
+    #print ConMySQL.getUser(os.environ['USER'])
+    #print ConMySQL.getTypeByTree()
+    #print ConMySQL.getKeys()
+    #print ConMySQL.getUniqueKeys()
+    #print ConMySQL.getNews(os.environ['USER'])
+    #print ConMySQL.updateUser('ps aux | sort -n -k 6 | awk \'{sum += $6/1024; print $6/1024 " MB\t\t" $11} END {print "Total " sum " MB"}\'')

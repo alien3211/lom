@@ -9,6 +9,7 @@ from AddRowWindowGTK import AddRowWindowGTK
 import csv
 import os
 from collections import deque
+import cgi
 
 def css():
     css = b"""
@@ -356,17 +357,16 @@ class Window():
         sw = gtk.ScrolledWindow()
         sw.set_shadow_type(gtk.ShadowType.IN)
         sw.set_size_request(450, 200)
-        sw.set_can_focus(True)
         sw.set_visible(True)
         sw.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.AUTOMATIC)
         self.gridMain.attach(sw,0,2,1,1)
         log.LOG("(0,1): %s" % self.gridMain.get_child_at(0,1))
 
 
-        self.labelText = gtk.Label("")
+        self.labelText = gtk.Label()
         self.labelText.set_markup(text)
         self.labelText.set_visible(True)
-        self.labelText.set_line_wrap(True)
+        self.labelText.set_selectable(True)
         self.labelText.props.valign = gtk.Align.START
         self.labelText.props.halign = gtk.Align.START
 
@@ -423,12 +423,15 @@ class Window():
 """
         selection = self.treeViewResult.get_selection()
         result = selection.get_selected()
+
         if result:
             model, iter = result
             widget = self.gridMain.get_child_at(0,2)
+
             if widget != None:
                 self.gridMain.remove(widget)
-            self.labelLayout(text_row.format(*model[iter]))
+            self.labelLayout(text_row.format(*[escape(x) for x in model[iter][:]]))
+
         self.__set_position(WINDOW_WIDTH, WINDOW_HEIGHT)
 
 
@@ -487,7 +490,7 @@ class Window():
                 helpList = '<span color="red">INVALID SYNTAX</span>\n' + helpList['description']
             else:
                 helpList = helpList['description']
-	        
+
             log.LOG("#### %s" % helpList)
             self.labelLayout(helpList)
         else:
@@ -674,7 +677,7 @@ class Window():
         log.LOG("END  getKeysList")
 
     def mapColumnNameToNumber(self, nameList):
-       
+
         mapNumber = {
 		'ID' : 0,
 		'Title' : 1,
@@ -683,8 +686,8 @@ class Window():
 		'Description' : 4,
 		'name_a' : 5,
 		'data_a' : 6}
-	
-        
+
+
 	return [(mapNumber[x], x) for x in nameList if x in mapNumber.keys()]
 
     def getNews(self):
@@ -752,3 +755,12 @@ class Window():
         self.setConfig()
 
         log.LOG("END setOption")
+
+def escape(s):
+    "escape html markup"
+    if isinstance(s, str):
+        s = s.replace("&", "&amp;")
+        s = s.replace("\<", "&lt;")
+        s = s.replace("\>", "&gt;")
+
+    return s
