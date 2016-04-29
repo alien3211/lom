@@ -15,7 +15,7 @@ class ConMySQL(object):
             db = MySQLdb.connect(ConMySQL.ip, 'lom', 'lom', 'LOM')
 
             cur = db.cursor(MySQLdb.cursors.DictCursor)
-	    log.LOG("query =<< ", query, " >> arg << ", arg, " >>")
+	    log.LOG("query =<< " + query + " >> arg << " + ' '.join(arg) + " >>")
             cur.execute(query, arg)
             data = cur.fetchallDict()
 
@@ -39,7 +39,7 @@ class ConMySQL(object):
             db = MySQLdb.connect(ConMySQL.ip, 'lom', 'lom', 'LOM')
 
             cur = db.cursor()
-	    log.LOG("query =<< ", query, " >> arg << ", arg, " >>")
+	    log.LOG("query =<< " + query + " >> arg << " + ' '.join(arg) + " >>")
             cur.execute(query, arg)
             db.commit()
 
