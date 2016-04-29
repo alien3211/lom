@@ -14,6 +14,7 @@ class ConMySQL(object):
             db = MySQLdb.connect(ConMySQL.ip, 'lom', 'lom', 'LOM')
 
             cur = db.cursor(MySQLdb.cursors.DictCursor)
+	    print "query =<< ", query, " >> arg << ", arg, " >>"
             cur.execute(query, arg)
             data = cur.fetchallDict()
 
@@ -69,7 +70,7 @@ class ConMySQL(object):
     text -> text
     id_parent -> int"""
 
-        query = "SELECT * FROM types_list where type =%s AND id_parent =%s"
+        query = "SELECT * FROM types_list where type = %s AND id_parent = %s"
         return cls.__getData(query, text, id_parent)
 
     @classmethod
@@ -189,8 +190,8 @@ class ConMySQL(object):
     def getHelp(cls, com='ALL'):
     	"""Get Help from DB"""
 
-        query = "SELECT name, s_name, description FROM help_list WHERE name =%s OR s_name =%s'"
-        help = cls.__getData(query, com)
+        query = "SELECT name, s_name, description FROM help_list WHERE name = %s OR s_name = %s"
+        help = cls.__getData(query, com, com)
 
 	if help:
 	    return help

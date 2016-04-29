@@ -217,6 +217,7 @@ class Window():
                 event.state & Gdk.ModifierType.CONTROL_MASK:
 
             self.entryCommandLine.emit_stop_by_name('key_press_event')
+            self.setHisoryFile()
             gtk.main_quit()
             self.window.destroy()
 
@@ -480,6 +481,21 @@ class Window():
 
         log.LOG("END getSelectedHis")
 
+    def getSelectedUpdate(self, widget, column, data):
+
+        log.LOG("START getSelectedUpdate")
+        log.LOG("widget= %s path= %s column= %s data=%s" % (self, widget, column, data))
+        selection = self.treeViewResult.get_selection()
+        result = selection.get_selected()
+        if result:
+            model, iter = result
+	    id_row = model[iter][0]
+            self.commonLayout()
+            gtkWindowUpdateRow = AddRowWindowGTK(self.configData['user'], True)
+            gtkWindowUpdateRow.main()
+
+        log.LOG("END getSelectedUpdate")
+
     def getHelp(self, com):
 
         log.LOG("START  getHelp")
@@ -508,7 +524,7 @@ class Window():
         #helper fun
         def checkRow(l, d, n):
 
-            log.LOG("######33 %s %s %s" % (l,d,n))
+            log.LOG("%s %s %s" % (l,d,n))
             t = []
             while not l[0].startswith('-'):
                 t.append(l.pop(0))
@@ -620,6 +636,41 @@ class Window():
         log.LOG("END getType")
 
         log.LOG("END  getTypeTree")
+
+
+    def updateRecord(self, com):
+
+        log.LOG("START updateRecord")
+
+        # clean TreeStore
+        self.component['search'].clear()
+
+        # Parse com
+        dPattern = {}
+
+        if com:
+            pattern = ' '.join(com)
+            for name in ['name', 'type', 'description', 'key_list', 'name_a']:
+                dPattern[name] = pattern
+
+        if dPattern:
+            rows = ConMySQL.getLib(dPattern)
+        else:
+            rows = ConMySQL.getLib()
+
+        for row in rows:
+            toadd = [row['id'], row['type'], row['name'], row['key_list'], row['description'], row['name_a'], row['date_a'].strftime("%Y-%m-%d %T")]
+            self.component['search'].append(toadd)
+
+
+        # Create, TreeView Layout
+        self.treeViewLayout(self.component['search'], self.getSelectedUpdate, 2)
+
+        # create columns
+        self.createColumns(self.treeViewResult, self.mapColumnNameToNumber(self.configData['short']))
+
+        log.LOG("END updateRecord")
+
 
     def createColumns(self, treeView, listColumnName):
 

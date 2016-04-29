@@ -9,9 +9,10 @@ import os
 
 class AddRowWindowGTK:
 
-    def __init__(self, user):
+    def __init__(self, user, update=False):
 
         self.user = user
+	self.update = update
 
         # Parse glade XML
         self.gladefile = os.path.dirname(os.path.abspath(__file__)) + "/glade/AddRowGladeWindow.glade"
@@ -32,18 +33,22 @@ class AddRowWindowGTK:
         self.treeVKeys = self.glade.get_object("treeviewKeys")
         self.treeVStoreKeys = self.glade.get_object("liststoreTreeKeys")
         self.labelInfoMarkup = self.glade.get_object("labelInfo")
+        self.buttonDone = self.glade.get_object("buttonDone")
 
-
-
-
+	# change button Done signal if update
+	if self.update:
+	    self.buttonDone.connect('clicked', self.clickedButtonUpdateDone)
 
         # initial text
-        self.initialText()
+	if self.update:
+            self.initialUpdateText()
+	else:
+            self.initialAddText()
 
         # show all object
         self.window.show_all()
 
-    def initialText(self):
+    def initialAddText(self):
 
         # TreeViewType
         typeData = ConMySQL.getTypeByTree()
@@ -71,6 +76,23 @@ class AddRowWindowGTK:
 
 
         gtk.StyleContext.reset_widgets(Gdk.Screen.get_default())
+
+    def initialUpdateText(self):
+
+        # TreeViewType
+        typeData = ConMySQL.getTypeByTree()
+        self.addRowToTreeView(typeData)
+	self.treeVType.expand_all()
+
+        # TextView description
+        self.addDescription()
+
+        # ComboBoxKey
+        keysData = ConMySQL.getUniqueKeys()
+        self.addListKeyToComboBox(keysData)
+
+        # TextBuffer
+        self.textBuffer.connect("changed", self.textChanged)
 
 
     def addRowToTreeView(self, typeData, parentName=('LOM', 1), parent=None):
@@ -118,7 +140,63 @@ class AddRowWindowGTK:
             except:
                 pass
 
-    def clickedButtonDone(self, button):
+    def clickedButtonAddDone(self, button):
+
+        dataRow = {}
+
+        #check entry name
+        if self.eName.get_text() in ["", "Unique name"]:
+            return self.print_error_message()
+
+        dataRow['name'] = self.eName.get_text()
+
+
+        #check select or add type
+        selection = self.treeVType.get_selection()
+        model, iter = selection.get_selected()
+
+        typeNameToRow = None
+
+        if iter:
+            dataRow['idType'] = model.get_value(iter,1)
+
+            if self.eType.get_text() != "":
+                typeNameToRow = self.eType.get_text()
+        else:
+            dataRow['idType'] = 1
+            if self.eType.get_text() != "":
+                typeNameToRow = self.eType.get_text()
+
+        if typeNameToRow and ConMySQL.getWhereTypeAndParent(typeNameToRow, dataRow['idType']):
+            return self.print_error_message("NOT Unique Type!!")
+
+        dataRow['nameType'] = typeNameToRow
+
+        #check description
+        if self.textBuffer.get_text(*self.textBuffer.get_bounds(), include_hidden_chars=True) == "":
+            return self.print_error_message("Fill in the description")
+
+        start_iter = self.textBuffer.get_start_iter()
+        end_iter   = self.textBuffer.get_end_iter()
+        dataRow['description'] = self.textBuffer.get_text(start_iter, end_iter, True)
+
+        #check add key
+        text = set()
+        item = self.treeVStoreKeys.get_iter_first()
+
+        while item != None:
+            text.add(self.treeVStoreKeys.get_value(item,0))
+            item = self.treeVStoreKeys.iter_next(item)
+
+        if len(text) == 0:
+            return self.print_error_message("Add at least one key")
+
+        dataRow['keys'] = ",".join(text).replace(' ', '_')
+
+        self.addWaitingRow(dataRow)
+
+
+    def clickedButtonUpdateDone(self, button):
 
         dataRow = {}
 
@@ -211,6 +289,7 @@ def escape(s):
 if __name__ == "__main__":
     try:
 
+	ConMySQL.ip = '172.19.20.19'
         gtkWindow = AddRowWindowGTK('pi')
         gtkWindow.main()
     except KeyboardInterrupt:
