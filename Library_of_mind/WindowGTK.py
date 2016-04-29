@@ -137,6 +137,7 @@ class Window():
 	    writer = csv.DictWriter(csvfile, tmp.keys())
 	    writer.writeheader()
 	    writer.writerow(tmp)
+	self.getConfig()
 
         log.LOG("END  setConfig")
 
