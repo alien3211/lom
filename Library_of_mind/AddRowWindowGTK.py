@@ -9,10 +9,11 @@ import os
 
 class AddRowWindowGTK:
 
-    def __init__(self, user, update=False):
+    def __init__(self, user, update=None):
 
         self.user = user
-	self.update = update
+	self.update_id = update
+	self.selected_type_iter = None
 
         # Parse glade XML
         self.gladefile = os.path.dirname(os.path.abspath(__file__)) + "/glade/AddRowGladeWindow.glade"
@@ -36,11 +37,11 @@ class AddRowWindowGTK:
         self.buttonDone = self.glade.get_object("buttonDone")
 
 	# change button Done signal if update
-	if self.update:
+	if self.update_id:
 	    self.buttonDone.connect('clicked', self.clickedButtonUpdateDone)
 
         # initial text
-	if self.update:
+	if self.update_id:
             self.initialUpdateText()
 	else:
             self.initialAddText()
@@ -79,31 +80,44 @@ class AddRowWindowGTK:
 
     def initialUpdateText(self):
 
+	row = ConMySQL.getLib({'id': '[[:<:]]' + str(self.update_id) + '[[:>:]]'})[0]
+
+
+	# set entryName
+	self.eName.set_text(row['name'])
+	
         # TreeViewType
         typeData = ConMySQL.getTypeByTree()
-        self.addRowToTreeView(typeData)
+        self.addRowToTreeView(typeData, row['id_type'])
 	self.treeVType.expand_all()
-
-        # TextView description
-        self.addDescription()
+        selection = self.treeVType.get_selection()
+	selection.select_iter(self.selected_type_iter)
 
         # ComboBoxKey
         keysData = ConMySQL.getUniqueKeys()
         self.addListKeyToComboBox(keysData)
+	
+	# keyList
+	for x in row['key_list'].split(','):
+            self.treeVStoreKeys.append([x])
 
         # TextBuffer
         self.textBuffer.connect("changed", self.textChanged)
 
+        # TextView description
+        self.addDescription(row['description'])
 
-    def addRowToTreeView(self, typeData, parentName=('LOM', 1), parent=None):
+    def addRowToTreeView(self, typeData, update_id=None, parentName=('LOM', 1), parent=None):
 
         if not typeData.get(parentName):
             return
         else:
             for child in typeData[parentName]:
                 newParent = self.treeStoreType.append(parent, [child[0],child[1]])
+		if update_id == child[1]:
+		    self.selected_type_iter = newParent
                 if typeData.get(child):
-                    self.addRowToTreeView(typeData, child, newParent)
+                    self.addRowToTreeView(typeData, update_id, child, newParent)
 
     def addDescription(self, desc = ""):
 

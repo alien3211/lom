@@ -73,8 +73,8 @@ class Window():
         # set config data
         self.configData = configData
         self.configData['history_file'] = os.path.expanduser("~") + "/.lom_history"
-        self.configData['history'] = 3000
-        self.configData['short'] = ['ID', 'Title', 'Name', 'Keys']
+        self.configData['history'] = 50
+        self.configData['short'] = ['Title', 'Name', 'Keys']
         self.configData['ip_MySQL'] = '172.19.20.19'
 
         if not os.path.exists(self.configData['lomrc']):
@@ -492,7 +492,7 @@ class Window():
             model, iter = result
 	    id_row = model[iter][0]
             self.commonLayout()
-            gtkWindowUpdateRow = AddRowWindowGTK(self.configData['user'], True)
+            gtkWindowUpdateRow = AddRowWindowGTK(self.configData['user'], id_row)
             gtkWindowUpdateRow.main()
 
         log.LOG("END getSelectedUpdate")
