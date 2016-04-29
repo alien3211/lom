@@ -794,7 +794,7 @@ class Window():
         log.LOG("START setOption")
 
         if len(com) >= 2 and com[0] in self.configData.keys():
-            self.configData[com[0]] = ' '.join(com[1])
+            self.configData[com[0]] = ' '.join(com[1:])
         elif not com:
             self.getConfig()
             message = ""
