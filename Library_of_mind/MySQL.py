@@ -2,6 +2,7 @@ import MySQLdb
 from sys import exit
 from datetime import datetime
 import os
+import log
 
 class ConMySQL(object):
 
@@ -14,13 +15,13 @@ class ConMySQL(object):
             db = MySQLdb.connect(ConMySQL.ip, 'lom', 'lom', 'LOM')
 
             cur = db.cursor(MySQLdb.cursors.DictCursor)
-	    print "query =<< ", query, " >> arg << ", arg, " >>"
+	    log.LOG("query =<< ", query, " >> arg << ", arg, " >>")
             cur.execute(query, arg)
             data = cur.fetchallDict()
 
         except MySQLdb.Error, e:
 
-            print "Error %d: %s" % (e.args[0], e.args[1])
+            log.LOG("Error %d: %s" % (e.args[0], e.args[1]))
 
         finally:
 
@@ -38,12 +39,13 @@ class ConMySQL(object):
             db = MySQLdb.connect(ConMySQL.ip, 'lom', 'lom', 'LOM')
 
             cur = db.cursor()
+	    log.LOG("query =<< ", query, " >> arg << ", arg, " >>")
             cur.execute(query, arg)
             db.commit()
 
         except MySQLdb.Error, e:
 
-            print "Error %d: %s" % (e.args[0], e.args[1])
+            log.LOG("Error %d: %s" % (e.args[0], e.args[1]))
 	#    raise e
 
         finally:
