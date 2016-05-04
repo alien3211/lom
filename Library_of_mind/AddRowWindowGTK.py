@@ -36,20 +36,19 @@ class AddRowWindowGTK:
         self.labelInfoMarkup = self.glade.get_object("labelInfo")
         self.buttonDone = self.glade.get_object("buttonDone")
 
-	# change button Done signal if update
-	if self.update_id:
-	    self.buttonDone.connect('clicked', self.clickedButtonUpdateDone)
-
         # initial text
 	if self.update_id:
             self.initialUpdateText()
+	    self.buttonDone.connect('clicked', self.clickedButtonDone, self.updateWaitingRow)
 	else:
             self.initialAddText()
+	    self.buttonDone.connect('clicked', self.clickedButtonDone, self.addWaitingRow)
 
         # show all object
         self.window.show_all()
 
     def initialAddText(self):
+
 
         # TreeViewType
         typeData = ConMySQL.getTypeByTree()
@@ -82,10 +81,9 @@ class AddRowWindowGTK:
 
 	row = ConMySQL.getLib({'id': '[[:<:]]' + str(self.update_id) + '[[:>:]]'})[0]
 
-
 	# set entryName
 	self.eName.set_text(row['name'])
-	
+
         # TreeViewType
         typeData = ConMySQL.getTypeByTree()
         self.addRowToTreeView(typeData, row['id_type'])
@@ -93,10 +91,15 @@ class AddRowWindowGTK:
         selection = self.treeVType.get_selection()
 	selection.select_iter(self.selected_type_iter)
 
+        # treeviewType scroll to selected row
+        tm, tree_iter = selection.get_selected()
+        path = tm.get_path(tree_iter)
+        self.treeVType.scroll_to_cell(path)
+
         # ComboBoxKey
         keysData = ConMySQL.getUniqueKeys()
         self.addListKeyToComboBox(keysData)
-	
+
 	# keyList
 	for x in row['key_list'].split(','):
             self.treeVStoreKeys.append([x])
@@ -154,7 +157,7 @@ class AddRowWindowGTK:
             except:
                 pass
 
-    def clickedButtonAddDone(self, button):
+    def clickedButtonDone(self, button, waitingRow):
 
         dataRow = {}
 
@@ -172,12 +175,12 @@ class AddRowWindowGTK:
         typeNameToRow = None
 
         if iter:
-            dataRow['idType'] = model.get_value(iter,1)
+            dataRow['id_type'] = model.get_value(iter,1)
 
             if self.eType.get_text() != "":
                 typeNameToRow = self.eType.get_text()
         else:
-            dataRow['idType'] = 1
+            dataRow['id_type'] = 1
             if self.eType.get_text() != "":
                 typeNameToRow = self.eType.get_text()
 
@@ -205,76 +208,32 @@ class AddRowWindowGTK:
         if len(text) == 0:
             return self.print_error_message("Add at least one key")
 
-        dataRow['keys'] = ",".join(text).replace(' ', '_')
+        dataRow['key_list'] = ",".join(text).replace(' ', '_')
 
-        self.addWaitingRow(dataRow)
-
-
-    def clickedButtonUpdateDone(self, button):
-
-        dataRow = {}
-
-        #check entry name
-        if self.eName.get_text() in ["", "Unique name"]:
-            return self.print_error_message()
-
-        dataRow['name'] = self.eName.get_text()
-
-
-        #check select or add type
-        selection = self.treeVType.get_selection()
-        model, iter = selection.get_selected()
-
-        typeNameToRow = None
-
-        if iter:
-            dataRow['idType'] = model.get_value(iter,1)
-
-            if self.eType.get_text() != "":
-                typeNameToRow = self.eType.get_text()
-        else:
-            dataRow['idType'] = 1
-            if self.eType.get_text() != "":
-                typeNameToRow = self.eType.get_text()
-
-        if typeNameToRow and ConMySQL.getWhereTypeAndParent(typeNameToRow, dataRow['idType']):
-            return self.print_error_message("NOT Unique Type!!")
-
-        dataRow['nameType'] = typeNameToRow
-
-        #check description
-        if self.textBuffer.get_text(*self.textBuffer.get_bounds(), include_hidden_chars=True) == "":
-            return self.print_error_message("Fill in the description")
-
-        start_iter = self.textBuffer.get_start_iter()
-        end_iter   = self.textBuffer.get_end_iter()
-        dataRow['description'] = self.textBuffer.get_text(start_iter, end_iter, True)
-
-        #check add key
-        text = set()
-        item = self.treeVStoreKeys.get_iter_first()
-
-        while item != None:
-            text.add(self.treeVStoreKeys.get_value(item,0))
-            item = self.treeVStoreKeys.iter_next(item)
-
-        if len(text) == 0:
-            return self.print_error_message("Add at least one key")
-
-        dataRow['keys'] = ",".join(text).replace(' ', '_')
-
-        self.addWaitingRow(dataRow)
+        waitingRow(dataRow)
 
 
     def addWaitingRow(self, dataRow):
 
         if dataRow['nameType']:
-            ConMySQL.setType(dataRow['nameType'], dataRow['idType'])
-	    idNewType = ConMySQL.getWhereTypeAndParent(dataRow['nameType'], dataRow['idType'])[0]['id_type']
+            ConMySQL.setType(dataRow['nameType'], dataRow['id_type'])
+	    idNewType = ConMySQL.getWhereTypeAndParent(dataRow['nameType'], dataRow['id_type'])[0]['id_type']
 
-            ConMySQL.setRow(dataRow['name'], idNewType, dataRow['description'], dataRow['keys'], self.user)
+            ConMySQL.setRow(dataRow['name'], idNewType, dataRow['description'], dataRow['key_list'], self.user)
 	else:
-            ConMySQL.setRow(dataRow['name'], dataRow['idType'], dataRow['description'], dataRow['keys'], self.user)
+            ConMySQL.setRow(dataRow['name'], dataRow['id_type'], dataRow['description'], dataRow['key_list'], self.user)
+
+        gtk.main_quit()
+        self.window.destroy()
+
+    def updateWaitingRow(self, dataRow):
+
+        if dataRow['nameType']:
+            ConMySQL.setType(dataRow['nameType'], dataRow['idType'])
+            dataRow['id_type'] = ConMySQL.getWhereTypeAndParent(dataRow['nameType'], dataRow['idType'])[0]['id_type']
+
+	del dataRow['nameType']
+	ConMySQL.UpdateLib(dataRow, self.update_id, self.user)
 
         gtk.main_quit()
         self.window.destroy()

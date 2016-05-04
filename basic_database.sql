@@ -85,7 +85,7 @@ CREATE TABLE keys_list(
     key_name VARCHAR(255),
     id_lib INTEGER,
     PRIMARY KEY (key_name, id_lib),
-    FOREIGN KEY (id_lib) REFERENCES library_list (id)
+    FOREIGN KEY (id_lib) REFERENCES waiting_list (id)
 );
 //
 
@@ -277,12 +277,15 @@ INSERT INTO help_list(name, s_name, description) VALUES("add","a","<tt>Usage:
 ");
 //
 INSERT INTO help_list(name, s_name, description) VALUES("update","u", "<tt>Usage:
+  <span>u[pdate] pattern</span>              - show row to update by pattern
+
+Double clik or select and press enter - update selected row
   </tt>
 ");
 //
 INSERT INTO help_list(name, s_name, description) VALUES("type","t","<tt>Usage:
-  <span>t[ype]</span>             - show all tree type 
-  <span>t[ype] patern</span>      - show tree by patern
+  <span>t[ype]</span>             - show all tree type
+  <span>t[ype] pattern</span>      - show tree by pattern
 
 Double clik or select and press enter - show all row by this type
 
@@ -293,7 +296,7 @@ Example:
 //
 INSERT INTO help_list(name, s_name, description) VALUES("key","k","<tt>Usage:
   <span>k[ey]</span>             - show all keys
-  <span>k[ey] patern</span>      - show keys by patern
+  <span>k[ey] pattern</span>      - show keys by pattern
 
 Double clik or select and press enter - show all row by this key
 
@@ -303,7 +306,7 @@ Example:
 ");
 //
 INSERT INTO help_list(name, s_name, description) VALUES("news","n","<tt>Usage:
-  <span>n[ews]</span>             - show new rows that 
+  <span>n[ews]</span>             - show new rows that
                        have been added since your last login
   </tt>
 ");

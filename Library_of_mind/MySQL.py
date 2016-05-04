@@ -13,15 +13,14 @@ class ConMySQL(object):
         try:
 
             db = MySQLdb.connect(ConMySQL.ip, 'lom', 'lom', 'LOM')
-
             cur = db.cursor(MySQLdb.cursors.DictCursor)
-	    log.LOG("query =<< " + query + " >> arg << " + ' '.join(arg) + " >>")
             cur.execute(query, arg)
             data = cur.fetchallDict()
 
         except MySQLdb.Error, e:
 
             log.LOG("Error %d: %s" % (e.args[0], e.args[1]))
+	    self.print_error_message("Error %d: %s" % (e.args[0], e.args[1]))
 
         finally:
 
@@ -37,15 +36,14 @@ class ConMySQL(object):
         try:
 
             db = MySQLdb.connect(ConMySQL.ip, 'lom', 'lom', 'LOM')
-
             cur = db.cursor()
-	    log.LOG("query =<< " + query + " >> arg << " + ' '.join(arg) + " >>")
             cur.execute(query, arg)
             db.commit()
 
         except MySQLdb.Error, e:
 
             log.LOG("Error %d: %s" % (e.args[0], e.args[1]))
+	    self.print_error_message("Error %d: %s" % (e.args[0], e.args[1]))
 	#    raise e
 
         finally:
@@ -233,6 +231,28 @@ class ConMySQL(object):
         cls.__setData(query, name, id_type, access, description, key_list.replace(' ',''), user)
 
     @classmethod
+    def UpdateLib(cls, dictPattern, row_id, user):
+    	"""
+    Update row from waiting DB
+    dictPattern -> dict{column : string}
+	example {'name' : 'new', 'description' : 'new description'}
+    id -> str
+    user -> str ($USER)"""
+
+        query = "UPDATE waiting_list SET"
+
+        tmp = []
+        for (k,v) in dictPattern.items():
+	    if str(v).isdigit():
+                tmp.append(" %s = %s " % (MySQLdb.escape_string(k), v))
+	    else:
+                tmp.append(" %s = '%s' " % (MySQLdb.escape_string(k), MySQLdb.escape_string(v)))
+        query += ', '.join(tmp) + ", date_m = NOW(), name_m = '" + user + "' WHERE id = " + str(row_id)
+
+
+        return cls.__setData(query)
+
+    @classmethod
     def updateUser(cls, user):
     	"""Update user last_login"""
 
@@ -249,8 +269,11 @@ class ConMySQL(object):
 if __name__ == '__main__':
 
     ConMySQL.ip = '172.19.20.19'
+    #ConMySQL.UpdateLib({'name_a', 'alte'}, 1)
+    print ConMySQL.UpdateLib({'name_a': 'alte', 'id_type' : '10'},'1')
     #print ConMySQL.getHelp('ps aux | sort -n -k 6 | awk \'{sum += $6/1024; print $6/1024 " MB\t\t" $11} END {print "Total " sum " MB"}\'')
-    #print ConMySQL.getLib({'name': 'rnc', 'type':'LOM'},'OR')
+    print ConMySQL.getLib({'id': '1'},'OR')
+    #print ConMySQL.getLib({'name': 'treeview', 'type':'LOM'},'OR')
     #print ConMySQL.getLib({'name':'tam'})
     #print ConMySQL.getUser(os.environ['USER'])
     #print ConMySQL.getTypeByTree()
