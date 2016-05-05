@@ -79,6 +79,7 @@ class AddRowWindowGTK:
 
     def initialUpdateText(self):
 
+	print {'id': '[[:<:]]' + str(self.update_id) + '[[:>:]]'}
 	row = ConMySQL.getLib({'id': '[[:<:]]' + str(self.update_id) + '[[:>:]]'})[0]
 
 	# set entryName

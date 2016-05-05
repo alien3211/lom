@@ -2,7 +2,7 @@ import time
 import sys
 from datetime import datetime
 
-this = sys.modules[__name__]  
+this = sys.modules[__name__]
 
 this.debug = False
 

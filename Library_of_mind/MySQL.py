@@ -144,6 +144,27 @@ class ConMySQL(object):
         return cls.__getData(query, access)
 
     @classmethod
+    def getLibDefaultDick(cls, dictPattern={'id':['.*']}, oper='OR', access='ALL'):
+        """
+    Get rows from Library DB
+    dictPattern -> dict{column : pattern}
+	example {'id' : '[1-5]'} or {'id' : '[1-5]', ''name' : 'RNC'}
+    oper -> str['OR', 'AND']
+	example oper='AND'
+	SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
+    access -> str ['All', [$USER]]"""
+
+        query = "SELECT * FROM VIEW_WAITING where id_access = %s AND "
+
+        result = []
+        for (k,val) in dictPattern.items():
+	    for v in val:
+	        tmp_query = query + " " + k + " REGEXP %s"
+	        result.extend(cls.__getData(tmp_query, access, v))
+
+        return {x['id']: x for x in result}.values()
+
+    @classmethod
     def getWeit(cls, dictPattern={'id':'.*'}, oper='OR', access='ALL'):
     	"""
     Get rows from waiting DB

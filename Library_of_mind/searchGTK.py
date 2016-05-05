@@ -16,20 +16,20 @@ class MainWindow(Gtk.Window):
     hb.props.title = "Resolution"
     self.set_titlebar(hb)
 
-    button = Gtk.Button()   
+    button = Gtk.Button()
     icon = Gio.ThemedIcon(name="emblem-system-symbolic")
     image = Gtk.Image.new_from_gicon(icon, 1)
     button.add(image)
     button.connect("clicked", self.sidebarShowHide)
     button.set_focus_on_click(False)
-    hb.pack_start(button)  
+    hb.pack_start(button)
 
     sidebarbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
     toplevelbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
 
     self.add(toplevelbox)
 
-    self.sidebar = Gtk.Box()     
+    self.sidebar = Gtk.Box()
     toplevelbox.pack_start(self.sidebar, False, False, 0)
     self.sidebar.add(sidebarbox)
 
@@ -57,6 +57,6 @@ class MainWindow(Gtk.Window):
 
 
 win = MainWindow()
-win.connect("delete-event", Gtk.main_quit)  
+win.connect("delete-event", Gtk.main_quit)
 win.show_all()
 Gtk.main()

@@ -8,7 +8,7 @@ from MySQL import ConMySQL
 from AddRowWindowGTK import AddRowWindowGTK
 import csv
 import os
-from collections import deque
+from collections import deque, defaultdict
 import cgi
 
 def css():
@@ -447,11 +447,35 @@ class Window():
         result = selection.get_selected()
         if result:
             model, iter = result
+
+            typeData = ConMySQL.getTypeByTree()
+	    child = (str(model.get_value(iter, 0)),model.get_value(iter, 1))
+
             id_type = ["-it", '[[:<:]]' + str(model.get_value(iter, 1)) + '[[:>:]]']
+
+            for i in self.getIdFromTreeType(typeData, child):
+	        id_type.extend(["-it", '[[:<:]]' + str(i) + '[[:>:]]'])
             self.commonLayout()
             self.search(id_type)
 
         log.LOG("END  getSelectedRowType")
+
+    def getIdFromTreeType(self, typeData, parentName=('LOM', 1)):
+
+        log.LOG("START getIdFromTreeType")
+	list_id = []
+
+        if not typeData.get(parentName):
+            return list_id
+        else:
+            for child in typeData[parentName]:
+                list_id.append(child[1])
+                if typeData.get(child):
+                    list_id.extend(self.getIdFromTreeType(typeData, child))
+        return list_id
+
+
+        log.LOG("END getIdFromTreeType")
 
     def getSelectedRowKey(self, widget, column, data):
 
@@ -535,19 +559,19 @@ class Window():
             if not t:
                 return self.print_error_message("Invalid syntax")
             else:
-                dPattern[n] = ' '.join(t)
+                dPattern[n].append(' '.join(t))
 
         # clean TreeStore
         self.component['search'].clear()
 
         # Parse com
-        dPattern = {}
+        dPattern = defaultdict(list)
 
         if com:
             if not com[0].startswith('-'):
                 pattern = ' '.join(com)
                 for name in ['name', 'type', 'description', 'key_list', 'name_a']:
-                    dPattern[name] = pattern
+                    dPattern[name].append(pattern)
 
             else:
                 while com:
@@ -578,7 +602,7 @@ class Window():
 
 
         if dPattern:
-            rows = ConMySQL.getLib(dPattern)
+            rows = ConMySQL.getLibDefaultDick(dPattern)
         else:
             rows = ConMySQL.getLib()
 
@@ -647,15 +671,15 @@ class Window():
         self.component['search'].clear()
 
         # Parse com
-        dPattern = {}
+        dPattern = defaultdict(list)
 
         if com:
             pattern = ' '.join(com)
             for name in ['name', 'type', 'description', 'key_list', 'name_a']:
-                dPattern[name] = pattern
+                dPattern[name].append(pattern)
 
         if dPattern:
-            rows = ConMySQL.getLib(dPattern)
+            rows = ConMySQL.getLibDefaultDick(dPattern)
         else:
             rows = ConMySQL.getLib()
 
