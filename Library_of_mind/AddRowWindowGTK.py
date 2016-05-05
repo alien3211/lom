@@ -184,7 +184,7 @@ class AddRowWindowGTK:
             if self.eType.get_text() != "":
                 typeNameToRow = self.eType.get_text()
 
-        if typeNameToRow and ConMySQL.getWhereTypeAndParent(typeNameToRow, dataRow['idType']):
+        if typeNameToRow and ConMySQL.getWhereTypeAndParent(typeNameToRow, dataRow['id_type']):
             return self.print_error_message("NOT Unique Type!!")
 
         dataRow['nameType'] = typeNameToRow

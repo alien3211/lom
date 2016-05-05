@@ -227,6 +227,8 @@ INSERT INTO types_list(id_type, type, id_parent) VALUES(25,"Tips & Tricks",22);
 //
 INSERT INTO types_list(id_type, type, id_parent) VALUES(26,"Project",22);
 //
+INSERT INTO types_list(id_type, type, id_parent) VALUES(27,"Databases",1);
+//
 
 
 INSERT INTO help_list(name, s_name, description) VALUES("ALL","","<tt>Usage:
