@@ -108,6 +108,7 @@ class Window():
         self.window = self.glade.get_object("window")
         self.gridMain = self.glade.get_object("gridMain")
         self.entryCommandLine = self.glade.get_object("entryCommandLine")
+        self.labelTitle = self.glade.get_object("labelTitle")
         self.labelText = None
         self.treeViewResult = None
 
@@ -335,6 +336,8 @@ class Window():
     def commonLayout(self):
 
         log.LOG("START  commonLayout")
+	self.labelTitle.set_text("Library Of Mind")
+
         self.window.set_size_request(WINDOW_WIDTH, WINDOW_HEIGHT)
 
         self.entryCommandLine.set_text("")
@@ -437,6 +440,7 @@ class Window():
         self.__set_position(WINDOW_WIDTH, WINDOW_HEIGHT)
 
 
+	self.labelTitle.set_text("Search --> %s" % model[iter][2])
         log.LOG("END  getSelectedRow")
 
     def getSelectedRowType(self, widget, column, data):
@@ -447,17 +451,20 @@ class Window():
         result = selection.get_selected()
         if result:
             model, iter = result
+	    type_name = str(model.get_value(iter, 0))
+	    type_id = model.get_value(iter, 1)
 
             typeData = ConMySQL.getTypeByTree()
-	    child = (str(model.get_value(iter, 0)),model.get_value(iter, 1))
+	    child = (type_name, type_id)
 
-            id_type = ["-it", '[[:<:]]' + str(model.get_value(iter, 1)) + '[[:>:]]']
+            id_type = ["-it", '[[:<:]]' + str(type_id) + '[[:>:]]']
 
             for i in self.getIdFromTreeType(typeData, child):
 	        id_type.extend(["-it", '[[:<:]]' + str(i) + '[[:>:]]'])
             self.commonLayout()
             self.search(id_type)
 
+	self.labelTitle.set_text("Type select --> %s" % type_name)
         log.LOG("END  getSelectedRowType")
 
     def getIdFromTreeType(self, typeData, parentName=('LOM', 1)):
@@ -485,11 +492,14 @@ class Window():
         result = selection.get_selected()
         if result:
             model, iter = result
-            id_type = ["-k", '[[:<:]]' + str(model.get_value(iter, 0)) + '[[:>:]]']
+	    key_name = str(model.get_value(iter, 0))
+
+            id_type = ["-k", '[[:<:]]' + key_name + '[[:>:]]']
             self.commonLayout()
             self.search(id_type)
 
 
+	self.labelTitle.set_text("Key select --> %s" % key_name)
         log.LOG("END  getSelectedRowKey")
 
     def getSelectedHis(self, widget, column, data):
@@ -519,6 +529,7 @@ class Window():
             gtkWindowUpdateRow = AddRowWindowGTK(self.configData['user'], id_row)
             gtkWindowUpdateRow.main()
 
+	self.labelTitle.set_text("Update select --> %s" % model[iter][1])
         log.LOG("END getSelectedUpdate")
 
     def getHelp(self, com):
@@ -540,6 +551,7 @@ class Window():
             self.labelLayout(helpList)
 
 
+	self.labelTitle.set_text("Help --> %s" % ' '.join(com) or 'All')
         log.LOG("END  getHelp")
 
     def search(self, com):
@@ -617,6 +629,7 @@ class Window():
         # create columns
         self.createColumns(self.treeViewResult, self.mapColumnNameToNumber(self.configData['short']))
 
+	self.labelTitle.set_text("Search --> %s" % (' '.join(com) if com else "All"))
         log.LOG("END  search")
 
 
@@ -626,6 +639,7 @@ class Window():
         gtkWindowAddRow = AddRowWindowGTK(self.configData['user'])
         gtkWindowAddRow.main()
 
+	self.labelTitle.set_text("Add record")
         log.LOG("END  addRecord")
 
     def getTypeTree(self, com):
@@ -658,6 +672,8 @@ class Window():
         # create columns
         self.createColumns(self.treeViewResult, [(0, 'Type')])
 
+
+	self.labelTitle.set_text("Type --> %s" % (' '.join(com) if com else "All"))
         log.LOG("END getType")
 
         log.LOG("END  getTypeTree")
@@ -694,6 +710,7 @@ class Window():
         # create columns
         self.createColumns(self.treeViewResult, self.mapColumnNameToNumber(self.configData['short']))
 
+	self.labelTitle.set_text("Update --> %s" % (' '.join(com) if com else "All"))
         log.LOG("END updateRecord")
 
 
@@ -750,6 +767,7 @@ class Window():
         # create columns
         self.createColumns(self.treeViewResult, [(0, 'keys')])
 
+	self.labelTitle.set_text("Keys --> %s" % (' '.join(com) if com else "All"))
         log.LOG("END  getKeysList")
 
     def mapColumnNameToNumber(self, nameList):
@@ -786,6 +804,7 @@ class Window():
         # create columns
         self.createColumns(self.treeViewResult, self.mapColumnNameToNumber(self.configData['short']))
 
+	self.labelTitle.set_text("News")
         log.LOG("END  getNews")
 
     def getDigit(self):
@@ -812,6 +831,7 @@ class Window():
         # create columns
         self.createColumns(self.treeViewResult, [(0, 'ID'),(1, 'History')])
 
+	self.labelTitle.set_text("History")
         log.LOG("END  getDigit")
 
     def setOption(self, com):
