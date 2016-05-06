@@ -36,6 +36,9 @@ class AddRowWindowGTK:
         self.labelInfoMarkup = self.glade.get_object("labelInfo")
         self.buttonDone = self.glade.get_object("buttonDone")
 
+
+        self.treeVType.connect("row-activated", self.unselectedRow)
+
         # initial text
 	if self.update_id:
             self.initialUpdateText()
@@ -46,6 +49,10 @@ class AddRowWindowGTK:
 
         # show all object
         self.window.show_all()
+
+    def unselectedRow(self, widget, column, data):
+        selection = widget.get_selection()
+	selection.unselect_all()
 
     def initialAddText(self):
 
