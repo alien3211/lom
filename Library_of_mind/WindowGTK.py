@@ -371,7 +371,7 @@ class Window():
 
 
         self.labelText = gtk.Label()
-        self.labelText.set_markup(text)
+        self.labelText.set_markup(escape(text))
         self.labelText.set_visible(True)
         self.labelText.set_selectable(True)
         self.labelText.props.valign = gtk.Align.START
@@ -437,7 +437,7 @@ class Window():
 
             if widget != None:
                 self.gridMain.remove(widget)
-            self.labelLayout(text_row.format(*[escape(x) for x in model[iter][:]]))
+            self.labelLayout(text_row.format(*model[iter]))
 
         self.__set_position(WINDOW_WIDTH, WINDOW_HEIGHT)
 

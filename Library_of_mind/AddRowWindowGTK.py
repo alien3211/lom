@@ -65,15 +65,23 @@ class AddRowWindowGTK:
         self.addRowToTreeView(typeData)
 	self.treeVType.expand_all()
 
-        # TextView description
-        self.addDescription()
-
         # ComboBoxKey
         keysData = ConMySQL.getUniqueKeys()
         self.addListKeyToComboBox(keysData)
 
         # TextBuffer
         self.textBuffer.connect("changed", self.textChanged)
+
+        # TextView description
+	text = """\<b><b>Bold</b>\<b>
+\<i><i>Italic</i>\</i>
+\<u><u>Underline</u>\</u>
+\<small><small>Small</small>\</small>
+\<big><big>Big</big>\</big>
+\<tt><tt>Monospace font</tt>\</tt>
+\<span color="red"><span color="red">Red color</span>\</span>
+\<a href="url"><a href="url">URL</a>\</a>"""
+        self.addDescription(text)
 
     def textChanged(self, buffer):
 
@@ -89,7 +97,6 @@ class AddRowWindowGTK:
 
     def initialUpdateText(self):
 
-	print {'id': '[[:<:]]' + str(self.update_id) + '[[:>:]]'}
 	row = ConMySQL.getLib({'id': '[[:<:]]' + str(self.update_id) + '[[:>:]]'})[0]
 
 	# set entryName

@@ -59,8 +59,8 @@ def usage(res):
   ./translateTool.py -m 1:1
 
   All key: """)
-    print out
-    print '\n  '.join(list_keys)
+    print (out)
+    print ('\n  '.join(list_keys))
     sys.exit(res)
 
 
