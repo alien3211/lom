@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=LibraryOfMind
+Comment=mind keys rows share
+Exec=LibraryOfMind
+Icon=preferences-desktop-keyboard-shortcuts
+Categories=Utility;

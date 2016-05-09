@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
+# "LibraryOfMind" is distributed under GNU GPLv3+, WITHOUT ANY WARRANTY.
+# Copyright(c) 2015: Alan Tetich <alan.tetich@gmail.com>
+
+from __future__ import print_function, unicode_literals
 
 import getopt
 

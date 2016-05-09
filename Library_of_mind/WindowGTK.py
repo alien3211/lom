@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import gi
+gi.require_version('Gtk','3.0')
+
 from gi.repository import Gtk as gtk
 from gi.repository import Gdk
 import log
@@ -9,7 +12,6 @@ from AddRowWindowGTK import AddRowWindowGTK
 import csv
 import os
 from collections import deque, defaultdict
-import cgi
 
 def css():
     css = b"""
