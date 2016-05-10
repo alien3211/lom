@@ -1,6 +1,7 @@
 DELETE FROM help_list;
 delimiter //
 
+
 INSERT INTO help_list(name, s_name, description) VALUES("ALL","","<tt>Usage:
   <span>s</span>   |  <span>search</span>  -- <span>show row  by pattern</span>
   <span>t</span>   |  <span>type</span>    -- <span>show types by pattern</span>
@@ -27,7 +28,7 @@ Example:
 //
 INSERT INTO help_list(name, s_name, description) VALUES("search","s","<tt>Usage:
   <span>s[earch]</span>                      - show all row
-  <span>s [-i,-n,-t,-d,-k,-a] pattern</span> - show row by pattern
+  <span>s [-i,-n,-t,-d,-k,-a] [pattern]</span> - show row by pattern
 Options:
   -i[d]            - regex pattern by id
   -n[ame]          - regex pattern by name
@@ -45,20 +46,22 @@ Example:
 //
 INSERT INTO help_list(name, s_name, description) VALUES("add","a","<tt>Usage:
   <span>a[dd]</span>              - add new row (open new window)
+  <span>a[dd] -t [pattern]</span> - add new type (select root type)
+
   </tt>
 Markup:
-\\<b><b>Bold</b>\\</b>
-\\<i><i>Italic</i>\\</i>
-\\<u><u>Underline</u>\\</u>
-\\<small><small>Small</small>\\</small>
-\\<big><big>Big</big>\\</big>
-\\<tt><tt>Monospace font</tt>\\</tt>
-\\<span color='red'><span color='red'>Red color</span>\\</span>
-\\<a href='url'><a href='url'>URL</a>\\</a>
+\<b><b>Bold</b>\<b>
+\<i><i>Italic</i>\</i>
+\<u><u>Underline</u>\</u>
+\<small><small>Small</small>\</small>
+\<big><big>Big</big>\</big>
+\<tt><tt>Monospace font</tt>\</tt>
+\<span color='red'><span color='red'>Red color</span>\</span>
+\<a href='url'><a href='url'>URL</a>\</a>
 ");
 //
 INSERT INTO help_list(name, s_name, description) VALUES("update","u", "<tt>Usage:
-  <span>u[pdate] pattern</span>              - show row to update by pattern
+  <span>u[pdate] [pattern]</span>              - show row to update by pattern
 
 Double clik or select and press enter - update selected row
   </tt>
@@ -66,7 +69,7 @@ Double clik or select and press enter - update selected row
 //
 INSERT INTO help_list(name, s_name, description) VALUES("type","t","<tt>Usage:
   <span>t[ype]</span>             - show all tree type
-  <span>t[ype] pattern</span>      - show tree by pattern
+  <span>t[ype] [pattern]</span>      - show tree by pattern
 
 Double clik or select and press enter - show all row by this type
 
@@ -77,7 +80,7 @@ Example:
 //
 INSERT INTO help_list(name, s_name, description) VALUES("key","k","<tt>Usage:
   <span>k[ey]</span>             - show all keys
-  <span>k[ey] pattern</span>      - show keys by pattern
+  <span>k[ey] [pattern]</span>      - show keys by pattern
 
 Double clik or select and press enter - show all row by this key
 

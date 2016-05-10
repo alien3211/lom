@@ -270,6 +270,7 @@ class Window():
         log.LOG("START  print_error_message")
 
         md = gtk.MessageDialog(self.window, type=gtk.MessageType.ERROR, buttons=gtk.ButtonsType.OK)
+	md.set_position(gtk.WindowPosition.CENTER_ON_PARENT)
         md.set_markup(text)
         md.run()
         md.destroy()
@@ -277,6 +278,30 @@ class Window():
         return None
 
         log.LOG("END  print_error_message")
+
+    def entry_dialog(self, message):
+
+        log.LOG("START entry_dialog")
+
+	dialog = gtk.MessageDialog(self.window, type=gtk.MessageType.QUESTION, buttons=gtk.ButtonsType.OK)
+	dialog.set_position(gtk.WindowPosition.CENTER_ON_PARENT)
+	dialog.set_markup(message)
+
+	dialogBox = dialog.get_content_area()
+	entry = gtk.Entry()
+	entry.set_size_request(200, 0)
+	dialogBox.pack_end(entry, False, False, 0)
+
+	dialog.show_all()
+	response = dialog.run()
+	text = entry.get_text() 
+        dialog.destroy()
+	if (response == gtk.ResponseType.OK) and (text != ''):
+	    return text
+	else:
+	    return None
+
+        log.LOG("END entry_dialog")
 
     def main(self):
 
@@ -313,11 +338,10 @@ class Window():
         elif command in ['search', 's']:
             self.search(rest)
         elif command in ['add','a']:
-            self.addRecord(rest)
+            self.addParser(rest)
         elif command in ['update', 'u']:
             self.updateRecord(rest)
         elif command in ['type', 't']:
-            log.LOG("GetType")
             self.getTypeTree(rest)
         elif command in ['key', 'k']:
             self.getKeysList(rest)
@@ -635,7 +659,7 @@ class Window():
         log.LOG("END  search")
 
 
-    def addRecord(self,com):
+    def addRecord(self):
 
         log.LOG("START  addRecord")
         gtkWindowAddRow = AddRowWindowGTK(self.configData['user'])
@@ -643,6 +667,77 @@ class Window():
 
 	self.labelTitle.set_text("Add record")
         log.LOG("END  addRecord")
+
+    def addParser(self,com):
+
+        log.LOG("START addParser")
+        if com:
+	    if com[0].startswith('-'):
+	        if com[0] in ['-t', '-type']:
+		    if len(com) == 2:
+		        self.selectNewType(com[1])
+		    else:
+		        self.selectNewType()
+		else:
+	            self.print_error_message("Invalid syntax More in <tt>help add</tt>")
+	    else:
+	        self.print_error_message("Invalid syntax More in <tt>help add</tt>")
+	else:
+	    self.addRecord()
+
+        log.LOG("END addParser")
+
+    def selectNewType(self, new_type=None):
+
+        log.LOG("START selectNewType")
+
+        self.component['type'].clear()
+
+        typeData = ConMySQL.getTypeByTree()
+
+        # Show all type by pattern
+        if new_type:
+            types = ConMySQL.getType(new_type)
+            for type in types:
+                child = (type['type'], type['id_type'])
+
+                parent = self.component['type'].append(None, child)
+                self.addRowToTreeView(typeData, child, parent)
+
+        else:
+        # Show all type
+            self.addRowToTreeView(typeData)
+
+        # Create, TreeView Layout
+        self.treeViewLayout(self.component['type'], self.addNewTypeToSelected)
+
+        # create columns
+        self.createColumns(self.treeViewResult, [(0, 'Type')])
+
+	self.labelTitle.set_text("Add new type. Please select parent type")
+
+        log.LOG("END selectNewType")
+
+    def addNewTypeToSelected(self, widget, column, data):
+
+        log.LOG("START addNewTypeToSelected")
+        log.LOG("widget= %s path= %s column= %s data=%s" % (self, widget, column, data))
+        selection = self.treeViewResult.get_selection()
+        result = selection.get_selected()
+        if result:
+            model, iter = result
+	    type_name = str(model.get_value(iter, 0))
+	    type_id = model.get_value(iter, 1)
+
+            new_type = self.entry_dialog("Please entry new type to <tt>%s</tt>" % type_name)
+	    if new_type:
+	        ConMySQL.setType(new_type, type_id)
+                self.commonLayout()
+	        self.labelTitle.set_text("Add new type '%s' to '%s'" % (new_type, type_name))
+	    else:
+	        self.print_error_message("Name is empty More <tt>help add</tt>")
+
+        log.LOG("END addNewTypeToSelected")
 
     def getTypeTree(self, com):
 
