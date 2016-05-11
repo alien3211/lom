@@ -20,7 +20,7 @@ class ConMySQL(object):
         except MySQLdb.Error, e:
 
             log.LOG("Error %d: %s" % (e.args[0], e.args[1]))
-	    self.print_error_message("Error %d: %s" % (e.args[0], e.args[1]))
+	    print ("Error %d: %s" % (e.args[0], e.args[1]))
 
         finally:
 
@@ -43,7 +43,7 @@ class ConMySQL(object):
         except MySQLdb.Error, e:
 
             log.LOG("Error %d: %s" % (e.args[0], e.args[1]))
-	    self.print_error_message("Error %d: %s" % (e.args[0], e.args[1]))
+	    print ("Error %d: %s" % (e.args[0], e.args[1]))
 	#    raise e
 
         finally:
@@ -252,7 +252,7 @@ class ConMySQL(object):
         cls.__setData(query, name, id_type, access, description, key_list.replace(' ',''), user)
 
     @classmethod
-    def UpdateLib(cls, dictPattern, row_id, user):
+    def UpdateLib(cls, name, id_type, description, key_list, row_id, user, access='ALL'):
     	"""
     Update row from waiting DB
     dictPattern -> dict{column : string}
@@ -260,18 +260,9 @@ class ConMySQL(object):
     id -> str
     user -> str ($USER)"""
 
-        query = "UPDATE waiting_list SET"
+        query = "UPDATE waiting_list SET name = %s, id_type = %s, id_access = %s, description = %s, key_list = %s, date_m = NOW(), name_m = %s WHERE id = %s"
 
-        tmp = []
-        for (k,v) in dictPattern.items():
-	    if str(v).isdigit():
-                tmp.append(" %s = %s " % (MySQLdb.escape_string(k), v))
-	    else:
-                tmp.append(" %s = '%s' " % (MySQLdb.escape_string(k), MySQLdb.escape_string(v)))
-        query += ', '.join(tmp) + ", date_m = NOW(), name_m = '" + user + "' WHERE id = " + str(row_id)
-
-
-        return cls.__setData(query)
+        return cls.__setData(query, name, id_type, access, description, key_list.replace(' ',''), user, row_id)
 
     @classmethod
     def updateUser(cls, user):

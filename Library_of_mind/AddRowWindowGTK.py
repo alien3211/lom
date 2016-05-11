@@ -250,20 +250,24 @@ class AddRowWindowGTK:
             ConMySQL.setType(dataRow['nameType'], dataRow['idType'])
             dataRow['id_type'] = ConMySQL.getWhereTypeAndParent(dataRow['nameType'], dataRow['idType'])[0]['id_type']
 
-	del dataRow['nameType']
-	ConMySQL.UpdateLib(dataRow, self.update_id, self.user)
+	ConMySQL.UpdateLib(dataRow['name'], dataRow['id_type'], dataRow['description'], dataRow['key_list'], self.update_id, self.user)
 
         gtk.main_quit()
         self.window.destroy()
 
     def print_error_message(self, text="fill all fields"):
 
+        log.LOG("START  print_error_message")
+
         md = gtk.MessageDialog(self.window, type=gtk.MessageType.ERROR, buttons=gtk.ButtonsType.OK)
+	md.set_position(gtk.WindowPosition.CENTER_ON_PARENT)
         md.set_markup(text)
         md.run()
         md.destroy()
 
         return None
+
+        log.LOG("END  print_error_message")
 
     def main(self):
         gtk.main()
