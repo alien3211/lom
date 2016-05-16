@@ -322,7 +322,7 @@ class Window():
 
         log.LOG("START  parserArgs")
 
-        arg = widget.get_text()
+        arg = escapePattern(widget.get_text())
         rest = arg.split()
         self.histpos = 0
         if rest and '\n' not in rest:
@@ -955,5 +955,12 @@ def escape(s):
         s = s.replace("&", "&amp;")
         s = s.replace("\<", "&lt;")
         s = s.replace("\>", "&gt;")
+
+    return s
+def escapePattern(s):
+    "escape html markup"
+    if isinstance(s, str):
+        s = s.replace("\<", "[[:<:]]")
+        s = s.replace("\>", "[[:>:]]")
 
     return s
