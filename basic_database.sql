@@ -238,10 +238,11 @@ INSERT INTO help_list(name, s_name, description) VALUES("ALL","","<tt>Usage:
   <span>a</span>   |  <span>add</span>     -- <span>add row</span>
   <span>u</span>   |  <span>update</span>  -- <span>update row</span>
   <span>n</span>   |  <span>news</span>    -- <span>new row since the last use</span>
-  <span>bye</span> |  <span>exit</span>    -- <span>exit WINDOW</span>
+  <span>o</span>   |  <span>open</span>    -- <span>open services with sentence</span>
   <span>set</span> |  <span>set</span>     -- <span>show/set env</span>
-  <span>h</span>   |  <span>help</span>    -- <span>this message</span>
   <span>his</span> |  <span>history</span> -- <span>show history</span>
+  <span>h</span>   |  <span>help</span>    -- <span>this message</span>
+  <span>bye</span> |  <span>exit</span>    -- <span>exit WINDOW</span>
 
   <span>More about command use help &lt;command&gt;</span></tt>
 ");
@@ -270,6 +271,18 @@ Double clik or select and press enter - show more info about row
 
 Example:
   <span>s -i [1-10] -k python</span>   - between options is 'OR'
+  </tt>
+");
+//
+INSERT INTO help_list(name, s_name, description) VALUES("open","o","<tt>Usage:
+  <span>o[pen] [-s, -u, -g]</span> sentence  - search sentence in services
+Options:
+  -s            - search sentense in StackOverflow
+  -u            - search sentense in StackExchange (Unix & linux)
+  -g            - search sentense in Google
+
+Example:
+  <span>open -g python</span> - opens a Google page with a search sentence
   </tt>
 ");
 //

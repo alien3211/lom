@@ -347,8 +347,10 @@ class Window():
             self.getKeysList(rest)
         elif command in ['news', 'n']:
             self.getNews()
-        elif command in ['his', 'history']:
+        elif command in ['history', 'his']:
             self.getHisory()
+        elif command in ['open', 'o']:
+            self.openWebBrowser(rest)
         elif command in ['exit', 'bye']:
             self.setHisoryFile()
             gtk.main_quit()
@@ -948,6 +950,29 @@ class Window():
         self.setConfig()
 
         log.LOG("END setOption")
+    
+    def openWebBrowser(self, com):
+        log.LOG("START openWebBrowser")
+	import webbrowser
+	
+	if len(com) >= 2 and com[0].startswith('-'):
+	    option = com.pop(0)
+	    if option in ['-s']:
+	        url = "http://stackoverflow.com/search?q=" + '+'.join(com)
+	    elif option in ['-u']:
+	        url = "http://unix.stackexchange.com/search?q=" + '+'.join(com)
+	    elif option in ['-g']:
+	        url = "https://www.google.pl/search?q=" + '+'.join(com)
+	    else:
+	        print "error ifa"
+	        return self.print_error_message('INVALID SYNTAX')
+
+	    webbrowser.open_new(url)
+
+	else:
+            self.print_error_message('INVALID SYNTAX')
+
+        log.LOG("END openWebBrowser")
 
 def escape(s):
     "escape html markup"
