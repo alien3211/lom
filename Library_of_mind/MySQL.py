@@ -3,6 +3,7 @@ from sys import exit
 from datetime import datetime
 import os
 import log
+import curl
 
 class ConMySQL(object):
 
@@ -39,6 +40,8 @@ class ConMySQL(object):
             cur = db.cursor()
             cur.execute(query, arg)
             db.commit()
+	    #send to my server req to add something
+	    curl.req(query, arg)
 
         except MySQLdb.Error, e:
 
