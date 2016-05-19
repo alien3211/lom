@@ -20,6 +20,7 @@ glkey = 'left_alt'
 glchar = 'q'
 glxx = 1
 glyy = 1
+oneShot = False
 
 def usage(res):
     out = ("""Usage:
@@ -83,9 +84,11 @@ def parseMove(arg):
 
 def parseArgs():
 
+    global oneShot
+
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hk:m:d",
-                                   ["help","key=", "move=", "--debug"])
+        opts, args = getopt.getopt(sys.argv[1:], "hk:m:do",
+                                   ["help","key=", "move=", "debug", "one_shot"])
     except getopt.GetoptError, err:
         usage(2)
 
@@ -99,30 +102,39 @@ def parseArgs():
             parseMove(arg)
         elif opt in ("-d", "--debug"):
             log.debug = True
+        elif opt in ("-o", "--one_shot"):
+            oneShot = True
 
 
-def startWindow(modifiers, keys):
+def startWindow(modifiers, keys,):
     if (modifiers[glkey] == True) and (keys == glchar):
-        args= {
-               'x' : glxx,
-               'y' : glyy}
+        runThreadWindow()
 
-        log.LOG("BEGIN Thread")
-        thread = ThreadWindow(args)
-        thread.start()
-        log.LOG("RUN Thread")
-        thread.join()
-        log.LOG("END Thread")
+def runThreadWindow():
+    args= {
+           'x' : glxx,
+           'y' : glyy}
+
+    log.LOG("BEGIN Thread")
+    thread = ThreadWindow(args)
+    thread.start()
+    log.LOG("RUN Thread")
+    thread.join()
+    log.LOG("END Thread")
+
 
 def main():
     parseArgs()
 
-    sleep_interval=.005
-    while True:
-        sleep(sleep_interval)
-        changed, modifiers, keys = fetch_keys()
-        if changed:
-            startWindow(modifiers, keys)
+    if oneShot:
+        runThreadWindow()
+    else:
+        sleep_interval=.005
+        while True:
+            sleep(sleep_interval)
+            changed, modifiers, keys = fetch_keys()
+            if changed:
+                startWindow(modifiers, keys)
 
 
 

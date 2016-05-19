@@ -465,7 +465,7 @@ class Window():
                 self.gridMain.remove(widget)
             self.labelLayout(text_row.format(*model[iter]))
 
-        self.__set_position(WINDOW_WIDTH, WINDOW_HEIGHT)
+        self.__set_position(WINDOW_WIDTH, WINDOW_HEIGHT + 200)
 
 
 	self.labelTitle.set_text("Search --> %s" % model[iter][2])
@@ -954,6 +954,8 @@ class Window():
     def openWebBrowser(self, com):
         log.LOG("START openWebBrowser")
 	import webbrowser
+
+        browser = webbrowser.BackgroundBrowser("gnome-open")
 	
 	if len(com) >= 2 and com[0].startswith('-'):
 	    option = com.pop(0)
@@ -967,7 +969,7 @@ class Window():
 	        print "error ifa"
 	        return self.print_error_message('INVALID SYNTAX')
 
-	    webbrowser.open_new(url)
+	    browser.open_new(url)
 
 	else:
             self.print_error_message('INVALID SYNTAX')
