@@ -21,6 +21,7 @@ glchar = 'q'
 glxx = 1
 glyy = 1
 oneShot = False
+size_200 = False
 
 def usage(res):
     out = ("""Usage:
@@ -84,10 +85,10 @@ def parseMove(arg):
 
 def parseArgs():
 
-    global oneShot
+    global oneShot, size_200
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hk:m:do",
+        opts, args = getopt.getopt(sys.argv[1:], "hk:m:dos",
                                    ["help","key=", "move=", "debug", "one_shot"])
     except getopt.GetoptError, err:
         usage(2)
@@ -104,6 +105,8 @@ def parseArgs():
             log.debug = True
         elif opt in ("-o", "--one_shot"):
             oneShot = True
+        elif opt in ("-s"):
+            size_200 = True
 
 
 def startWindow(modifiers, keys,):
@@ -112,8 +115,9 @@ def startWindow(modifiers, keys,):
 
 def runThreadWindow():
     args= {
-           'x' : glxx,
-           'y' : glyy}
+           '_x' : glxx,
+           '_y' : glyy,
+	   '_size_200' : size_200}
 
     log.LOG("BEGIN Thread")
     thread = ThreadWindow(args)

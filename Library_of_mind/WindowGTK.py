@@ -134,7 +134,7 @@ class Window():
 
         log.LOG("START  setConfig")
 
-	tmp = self.configData
+	tmp =  dict(filter(lambda x: not x[0].startswith('_'), self.configData.items()))
 	tmp['short'] = ' '.join(tmp['short'])
 	with open(self.configData['lomrc'], 'wb') as csvfile:
 	    writer = csv.DictWriter(csvfile, tmp.keys())
@@ -151,7 +151,8 @@ class Window():
 	with open(self.configData['lomrc']) as csvfile:
 	    reader = csv.DictReader(csvfile)
 	    for row in reader:
-	      self.configData = row
+	        for k,v in row.items():
+	            self.configData[k] = v
 	self.configData['short'] = self.configData['short'].split()
 
         log.LOG("END  getConfig")
@@ -191,8 +192,8 @@ class Window():
 
         log.LOG("START  __set_position")
         (w, h) = width, height
-        x = int(Gdk.Screen.get_default().get_width() * int(self.configData['x']))
-        y = int(Gdk.Screen.get_default().get_height() * int(self.configData['y']))
+        x = int(Gdk.Screen.get_default().get_width() * int(self.configData['_x']))
+        y = int(Gdk.Screen.get_default().get_height() * int(self.configData['_y']))
 
         #Set position Left-Button
         log.LOG("(x,y) = (%s,%s)   (w,h) = (%s,%s)" % (x,y,w,h))
@@ -464,8 +465,7 @@ class Window():
             if widget != None:
                 self.gridMain.remove(widget)
             self.labelLayout(text_row.format(*model[iter]))
-
-        self.__set_position(WINDOW_WIDTH, WINDOW_HEIGHT + 200)
+        self.__set_position(WINDOW_WIDTH, WINDOW_HEIGHT + 200 if self.configData['_size_200'] else 0)
 
 
 	self.labelTitle.set_text("Search --> %s" % model[iter][2])
@@ -943,7 +943,8 @@ class Window():
             self.getConfig()
             message = ""
             for k, v in self.configData.items():
-                message += "%s = %s\n" % (k, v)
+	        if not k.startswith('_'):
+                    message += "%s = %s\n" % (k, v)
             self.labelLayout(message)
         else:
             self.print_error_message('INVALID SYNTAX')
@@ -966,7 +967,6 @@ class Window():
 	    elif option in ['-g']:
 	        url = "https://www.google.pl/search?q=" + '+'.join(com)
 	    else:
-	        print "error ifa"
 	        return self.print_error_message('INVALID SYNTAX')
 
 	    browser.open_new(url)
