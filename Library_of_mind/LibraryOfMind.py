@@ -11,6 +11,8 @@ from keycatch import *
 from ThreadWindow import ThreadWindow
 import log
 import sys
+from checkProc import checkProc
+
 
 sys.path.append('/afs/ericpol.int/home/a/l/alte/pub/.my_lib')
 
@@ -144,4 +146,8 @@ def main():
 
 
 if __name__ == '__main__':
+    pid = checkProc(['python.*LibraryOfMind.py']) 
+    if pid >= 2:
+      print("You have already started LibraryOfMind")
+      exit(1)
     main()
