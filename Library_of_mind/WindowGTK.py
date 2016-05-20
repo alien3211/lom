@@ -969,7 +969,7 @@ class Window():
 	    else:
 	        return self.print_error_message('INVALID SYNTAX')
 
-	    browser.open_new(url)
+	    browser.open(url)
 
 	else:
             self.print_error_message('INVALID SYNTAX')

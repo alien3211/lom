@@ -129,6 +129,7 @@ def runThreadWindow():
 
 def main():
     parseArgs()
+    print ("If you want search please press {}+{}".format(glkey, glchar))
 
     if oneShot:
         runThreadWindow()
