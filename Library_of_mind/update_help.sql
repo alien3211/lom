@@ -63,14 +63,14 @@ INSERT INTO help_list(name, s_name, description) VALUES("add","a","<tt>Usage:
 
   </tt>
 Markup:
-\<b><b>Bold</b>\<b>
-\<i><i>Italic</i>\</i>
-\<u><u>Underline</u>\</u>
-\<small><small>Small</small>\</small>
-\<big><big>Big</big>\</big>
-\<tt><tt>Monospace font</tt>\</tt>
-\<span color='red'><span color='red'>Red color</span>\</span>
-\<a href='url'><a href='url'>URL</a>\</a>
+\\<b><b>Bold</b>\\</b>
+\\<i><i>Italic</i>\\</i>
+\\<u><u>Underline</u>\\</u>
+\\<small><small>Small</small>\\</small>
+\\<big><big>Big</big>\\</big>
+\\<tt><tt>Monospace font</tt>\\</tt>
+\\<span color='red'><span color='red'>Red color</span>\\</span>
+\\<a href='url'><a href='url'>URL</a>\\</a>
 ");
 //
 INSERT INTO help_list(name, s_name, description) VALUES("update","u", "<tt>Usage:
