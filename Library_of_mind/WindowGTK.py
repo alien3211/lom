@@ -411,7 +411,7 @@ class Window():
 
         log.LOG("END  labelLayout")
 
-    def treeViewLayout(self, model, getSelectedRow, search_col=0):
+    def treeViewLayout(self, model, activatedRow, getSelectedRow, search_col=0):
         """
         Create treeView
         model -> GTK Storage
@@ -436,17 +436,20 @@ class Window():
         self.treeViewResult.set_can_focus(True)
         self.treeViewResult.set_model(model)
         self.treeViewResult.set_search_column(search_col)
-        self.treeViewResult.connect("row-activated", getSelectedRow)
+        self.treeViewResult.connect("row-activated", activatedRow)
+        self.treeViewResult.connect("cursor-changed", getSelectedRow)
         sw.add(self.treeViewResult)
 
         self.__set_position()
 
         log.LOG("END  treeViewLayout")
 
-    def getSelectedRow(self, widget, column, data):
+    def doNothing(*arg):
+        pass
+
+    def getSelectedRow(self, widget):
 
         log.LOG("START  getSelectedRow")
-        log.LOG("widget= %s path= %s column= %s data=%s" % (self, widget, column, data))
 	text_row ="""
 <span color="#929287">Title: </span><span>{1}</span>
 <span color="#929287">Name: </span><span>{2}</span>
@@ -455,15 +458,15 @@ class Window():
 <span color="#929287">Keys: </span><span>{3}</span>
 <span color="#929287">Autor: </span><span weight="bold">{5}</span>\t<span color="#929287">Date: </span><span>{6}</span>
 """
-        selection = self.treeViewResult.get_selection()
+        selection = widget.get_selection()
         result = selection.get_selected()
 
         if result:
             model, iter = result
-            widget = self.gridMain.get_child_at(0,2)
+            wid = self.gridMain.get_child_at(0,2)
 
-            if widget != None:
-                self.gridMain.remove(widget)
+            if wid != None:
+                self.gridMain.remove(wid)
             self.labelLayout(text_row.format(*model[iter]))
         self.__set_position(WINDOW_WIDTH, WINDOW_HEIGHT + 200 if self.configData['_size_200'] else 0)
 
@@ -475,7 +478,7 @@ class Window():
 
         log.LOG("START  getSelectedRowType")
         log.LOG("widget= %s path= %s column= %s data=%s" % (self, widget, column, data))
-        selection = self.treeViewResult.get_selection()
+        selection = widget.get_selection()
         result = selection.get_selected()
         if result:
             model, iter = result
@@ -494,6 +497,18 @@ class Window():
 
 	self.labelTitle.set_text("Type select --> %s" % type_name)
         log.LOG("END  getSelectedRowType")
+
+    def getExpandRow(self, widget):
+        log.LOG("START getExpandRow")
+
+        selection = widget.get_selection()
+        result = selection.get_selected()
+        if result:
+            model, iter = result
+	    path = model.get_path(iter)
+            widget.expand_to_path(path)
+
+        log.LOG("END getExpandRow")
 
     def getIdFromTreeType(self, typeData, parentName=('LOM', 1)):
 
@@ -516,7 +531,7 @@ class Window():
 
         log.LOG("START  getSelectedRowKey")
         log.LOG("widget= %s path= %s column= %s data=%s" % (self, widget, column, data))
-        selection = self.treeViewResult.get_selection()
+        selection = widget.get_selection()
         result = selection.get_selected()
         if result:
             model, iter = result
@@ -534,7 +549,7 @@ class Window():
 
         log.LOG("START getSelectedHis")
         log.LOG("widget= %s path= %s column= %s data=%s" % (self, widget, column, data))
-        selection = self.treeViewResult.get_selection()
+        selection = widget.get_selection()
         result = selection.get_selected()
         if result:
             model, iter = result
@@ -548,7 +563,7 @@ class Window():
 
         log.LOG("START getSelectedUpdate")
         log.LOG("widget= %s path= %s column= %s data=%s" % (self, widget, column, data))
-        selection = self.treeViewResult.get_selection()
+        selection = widget.get_selection()
         result = selection.get_selected()
         if result:
             model, iter = result
@@ -652,7 +667,7 @@ class Window():
 
 
         # Create, TreeView Layout
-        self.treeViewLayout(self.component['search'], self.getSelectedRow, 2)
+        self.treeViewLayout(self.component['search'], self.doNothing, self.getSelectedRow, 2)
 
         # create columns
         self.createColumns(self.treeViewResult, self.mapColumnNameToNumber(self.configData['short']))
@@ -711,7 +726,7 @@ class Window():
             self.addRowToTreeView(typeData)
 
         # Create, TreeView Layout
-        self.treeViewLayout(self.component['type'], self.addNewTypeToSelected)
+        self.treeViewLayout(self.component['type'], self.addNewTypeToSelected, self.doNothing)
 
         # create columns
         self.createColumns(self.treeViewResult, [(0, 'Type')])
@@ -724,7 +739,7 @@ class Window():
 
         log.LOG("START addNewTypeToSelected")
         log.LOG("widget= %s path= %s column= %s data=%s" % (self, widget, column, data))
-        selection = self.treeViewResult.get_selection()
+        selection = widget.get_selection()
         result = selection.get_selected()
         if result:
             model, iter = result
@@ -766,7 +781,7 @@ class Window():
             self.addRowToTreeView(typeData)
 
         # Create, TreeView Layout
-        self.treeViewLayout(self.component['type'], self.getSelectedRowType)
+        self.treeViewLayout(self.component['type'], self.getSelectedRowType, self.getExpandRow)
 
         # create columns
         self.createColumns(self.treeViewResult, [(0, 'Type')])
@@ -804,7 +819,7 @@ class Window():
 
 
         # Create, TreeView Layout
-        self.treeViewLayout(self.component['search'], self.getSelectedUpdate, 2)
+        self.treeViewLayout(self.component['search'], self.getSelectedUpdate, self.doNothing, 2)
 
         # create columns
         self.createColumns(self.treeViewResult, self.mapColumnNameToNumber(self.configData['short']))
@@ -824,8 +839,6 @@ class Window():
             column.set_sort_indicator(True)
             column.set_sort_column_id(0)
             treeView.append_column(column)
-	    treeView.expand_all()
-
 
         log.LOG("END  createColumns")
 
@@ -861,7 +874,7 @@ class Window():
 
 
         # Create, TreeView Layout
-        self.treeViewLayout(self.component['keys'], self.getSelectedRowKey)
+        self.treeViewLayout(self.component['keys'], self.getSelectedRowKey, self.doNothing)
 
         # create columns
         self.createColumns(self.treeViewResult, [(0, 'keys')])
@@ -898,7 +911,7 @@ class Window():
             self.component['news'].append(toadd)
 
         # Create, TreeView Layout
-        self.treeViewLayout(self.component['news'], self.getSelectedRow, 2)
+        self.treeViewLayout(self.component['news'], self.doNothing, self.getSelectedRow, 2)
 
         # create columns
         self.createColumns(self.treeViewResult, self.mapColumnNameToNumber(self.configData['short']))
@@ -925,7 +938,7 @@ class Window():
 
 
         # Create, TreeView Layout
-        self.treeViewLayout(self.component['history'], self.getSelectedHis, 1)
+        self.treeViewLayout(self.component['history'], self.getSelectedHis, self.doNothing, 1)
 
         # create columns
         self.createColumns(self.treeViewResult, [(0, 'ID'),(1, 'History')])

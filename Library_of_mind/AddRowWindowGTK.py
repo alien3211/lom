@@ -63,7 +63,7 @@ class AddRowWindowGTK:
         # TreeViewType
         typeData = ConMySQL.getTypeByTree()
         self.addRowToTreeView(typeData)
-	self.treeVType.expand_all()
+        self.treeVType.connect("cursor-changed", self.getExpandRow)
 
         # ComboBoxKey
         keysData = ConMySQL.getUniqueKeys()
@@ -254,6 +254,18 @@ class AddRowWindowGTK:
 
         gtk.main_quit()
         self.window.destroy()
+
+    def getExpandRow(self, widget):
+        log.LOG("START getExpandRow")
+
+        selection = widget.get_selection()
+        result = selection.get_selected()
+        if result:
+            model, iter = result
+	    path = model.get_path(iter)
+            widget.expand_to_path(path)
+
+        log.LOG("END getExpandRow")
 
     def print_error_message(self, text="fill all fields"):
 
