@@ -726,7 +726,7 @@ class Window():
             self.addRowToTreeView(typeData)
 
         # Create, TreeView Layout
-        self.treeViewLayout(self.component['type'], self.addNewTypeToSelected, self.doNothing)
+        self.treeViewLayout(self.component['type'], self.addNewTypeToSelected, self.getExpandRow)
 
         # create columns
         self.createColumns(self.treeViewResult, [(0, 'Type')])
