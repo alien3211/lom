@@ -5,7 +5,7 @@ import gi
 gi.require_version('Gtk','3.0')
 
 from gi.repository import Gtk as gtk
-from gi.repository import Gdk, Pango, Gio, GLib
+from gi.repository import Gdk
 import log
 from MySQL import ConMySQL
 import os
@@ -15,8 +15,8 @@ class AddRowWindowGTK:
     def __init__(self, user, update=None):
 
         self.user = user
-	self.update_id = update
-	self.selected_type_iter = None
+        self.update_id = update
+        self.selected_type_iter = None
 
         # Parse glade XML
         self.gladefile = os.path.dirname(os.path.abspath(__file__)) + "/glade/AddRowGladeWindow.glade"
@@ -43,19 +43,19 @@ class AddRowWindowGTK:
         self.treeVType.connect("row-activated", self.unselectedRow)
 
         # initial text
-	if self.update_id:
+        if self.update_id:
             self.initialUpdateText()
-	    self.buttonDone.connect('clicked', self.clickedButtonDone, self.updateWaitingRow)
-	else:
+            self.buttonDone.connect('clicked', self.clickedButtonDone, self.updateWaitingRow)
+        else:
             self.initialAddText()
-	    self.buttonDone.connect('clicked', self.clickedButtonDone, self.addWaitingRow)
+            self.buttonDone.connect('clicked', self.clickedButtonDone, self.addWaitingRow)
 
         # show all object
         self.window.show_all()
 
     def unselectedRow(self, widget, column, data):
         selection = widget.get_selection()
-	selection.unselect_all()
+        selection.unselect_all()
 
     def initialAddText(self):
 
@@ -73,14 +73,15 @@ class AddRowWindowGTK:
         self.textBuffer.connect("changed", self.textChanged)
 
         # TextView description
-	text = """\<b><b>Bold</b>\<b>
+        text = """\<b><b>Bold</b>\<b>
 \<i><i>Italic</i>\</i>
 \<u><u>Underline</u>\</u>
 \<small><small>Small</small>\</small>
 \<big><big>Big</big>\</big>
 \<tt><tt>Monospace font</tt>\</tt>
 \<span color="red"><span color="red">Red color</span>\</span>
-\<a href="url"><a href="url">URL</a>\</a>"""
+\<a href="url"><a href="url">URL</a>\</a>
+\<span color="gray">\<small>\<i><span color="gray"><small><i># comment</i></small></span>\</i>\</small>\</span>"""
         self.addDescription(text)
 
     def textChanged(self, buffer):
@@ -97,17 +98,17 @@ class AddRowWindowGTK:
 
     def initialUpdateText(self):
 
-	row = ConMySQL.getLib({'id': '[[:<:]]' + str(self.update_id) + '[[:>:]]'})[0]
+        row = ConMySQL.getLib({'id': '[[:<:]]' + str(self.update_id) + '[[:>:]]'})[0]
 
-	# set entryName
-	self.eName.set_text(row['name'])
+        # set entryName
+        self.eName.set_text(row['name'])
 
         # TreeViewType
         typeData = ConMySQL.getTypeByTree()
         self.addRowToTreeView(typeData, row['id_type'])
-	self.treeVType.expand_all()
+        self.treeVType.expand_all()
         selection = self.treeVType.get_selection()
-	selection.select_iter(self.selected_type_iter)
+        selection.select_iter(self.selected_type_iter)
 
         # treeviewType scroll to selected row
         tm, tree_iter = selection.get_selected()
@@ -118,8 +119,8 @@ class AddRowWindowGTK:
         keysData = ConMySQL.getUniqueKeys()
         self.addListKeyToComboBox(keysData)
 
-	# keyList
-	for x in row['key_list'].split(','):
+        # keyList
+        for x in row['key_list'].split(','):
             self.treeVStoreKeys.append([x])
 
         # TextBuffer
@@ -135,8 +136,8 @@ class AddRowWindowGTK:
         else:
             for child in typeData[parentName]:
                 newParent = self.treeStoreType.append(parent, [child[0],child[1]])
-		if update_id == child[1]:
-		    self.selected_type_iter = newParent
+                if update_id == child[1]:
+                    self.selected_type_iter = newParent
                 if typeData.get(child):
                     self.addRowToTreeView(typeData, update_id, child, newParent)
 
@@ -235,10 +236,10 @@ class AddRowWindowGTK:
 
         if dataRow['nameType']:
             ConMySQL.setType(dataRow['nameType'], dataRow['id_type'])
-	    idNewType = ConMySQL.getWhereTypeAndParent(dataRow['nameType'], dataRow['id_type'])[0]['id_type']
+            idNewType = ConMySQL.getWhereTypeAndParent(dataRow['nameType'], dataRow['id_type'])[0]['id_type']
 
             ConMySQL.setRow(dataRow['name'], idNewType, dataRow['description'], dataRow['key_list'], self.user)
-	else:
+        else:
             ConMySQL.setRow(dataRow['name'], dataRow['id_type'], dataRow['description'], dataRow['key_list'], self.user)
 
         gtk.main_quit()
@@ -250,7 +251,7 @@ class AddRowWindowGTK:
             ConMySQL.setType(dataRow['nameType'], dataRow['idType'])
             dataRow['id_type'] = ConMySQL.getWhereTypeAndParent(dataRow['nameType'], dataRow['idType'])[0]['id_type']
 
-	ConMySQL.UpdateLib(dataRow['name'], dataRow['id_type'], dataRow['description'], dataRow['key_list'], self.update_id, self.user)
+        ConMySQL.UpdateLib(dataRow['name'], dataRow['id_type'], dataRow['description'], dataRow['key_list'], self.update_id, self.user)
 
         gtk.main_quit()
         self.window.destroy()
@@ -262,17 +263,54 @@ class AddRowWindowGTK:
         result = selection.get_selected()
         if result:
             model, iter = result
-	    path = model.get_path(iter)
+            path = model.get_path(iter)
             widget.expand_to_path(path)
 
         log.LOG("END getExpandRow")
+
+    # action for markup button
+
+    def setBoundsMarkup(self, s_tag, e_tag):
+        bounds = self.textBuffer.get_selection_bounds()
+        if len(bounds) != 0:
+            start, end = bounds
+            text = s_tag + self.textBuffer.get_text(start, end, True) + e_tag
+            self.textBuffer.delete(start, end)
+            self.textBuffer.insert(start, text)
+
+    def clickedButtonBold(self, button):
+        self.setBoundsMarkup('<b>', '</b>')
+
+    def clickedButtonItalic(self, button):
+        self.setBoundsMarkup('<i>', '</i>')
+
+    def clickedButtonUnderline(self, button):
+        self.setBoundsMarkup('<u>', '</u>')
+
+    def clickedButtonSmall(self, button):
+        self.setBoundsMarkup('<small>', '</small>')
+
+    def clickedButtonBig(self, button):
+        self.setBoundsMarkup('<big>', '</big>')
+
+    def clickedButtonCode(self, button):
+        self.setBoundsMarkup('\n<tt>\n', '\n</tt>\n')
+
+    def clickedButtonColor(self, button):
+        self.setBoundsMarkup('<span color="">', '</span>')
+
+    def clickedButtonComent(self, button):
+        self.setBoundsMarkup('<span color="gray"><small><i>', '</i></small></span>')
+
+    def clickedButtonUrl(self, button):
+        self.setBoundsMarkup('<a href="">', '</a>')
 
     def print_error_message(self, text="fill all fields"):
 
         log.LOG("START  print_error_message")
 
         md = gtk.MessageDialog(self.window, type=gtk.MessageType.ERROR, buttons=gtk.ButtonsType.OK)
-	md.set_position(gtk.WindowPosition.CENTER_ON_PARENT)
+        md.set_position(gtk.WindowPosition.CENTER_ON_PARENT)
         md.set_markup(text)
         md.run()
         md.destroy()
@@ -296,7 +334,7 @@ def escape(s):
 if __name__ == "__main__":
     try:
 
-	ConMySQL.ip = '172.19.20.19'
+        ConMySQL.ip = '172.19.20.19'
         gtkWindow = AddRowWindowGTK('pi')
         gtkWindow.main()
     except KeyboardInterrupt:
