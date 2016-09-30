@@ -277,6 +277,8 @@ class AddRowWindowGTK:
             text = s_tag + self.textBuffer.get_text(start, end, True) + e_tag
             self.textBuffer.delete(start, end)
             self.textBuffer.insert(start, text)
+        else:
+            self.textBuffer.insert_at_cursor(s_tag + e_tag)
 
     def clickedButtonBold(self, button):
         self.setBoundsMarkup('<b>', '</b>')
