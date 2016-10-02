@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import log
 import pkgutil
 import os
+
 
 def getWindow(configData):
     log.LOG("IN GETWINDOW")
@@ -17,4 +18,3 @@ def getWindow(configData):
         log.LOG("import QT")
         import WindowQT
         return WindowQT.Window()
-

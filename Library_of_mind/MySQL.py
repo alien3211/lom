@@ -1,9 +1,8 @@
 import MySQLdb
-from sys import exit
-from datetime import datetime
 import os
 import log
 import curl
+
 
 class ConMySQL(object):
 
@@ -21,7 +20,7 @@ class ConMySQL(object):
         except MySQLdb.Error, e:
 
             log.LOG("Error %d: %s" % (e.args[0], e.args[1]))
-	    print ("Error %d: %s" % (e.args[0], e.args[1]))
+            print ("Error %d: %s" % (e.args[0], e.args[1]))
 
         finally:
 
@@ -40,14 +39,14 @@ class ConMySQL(object):
             cur = db.cursor()
             cur.execute(query, arg)
             db.commit()
-	    #send to my server req to add something
-	    curl.req(query, arg)
+            # send to my server req to add something
+            curl.req(query, arg)
 
         except MySQLdb.Error, e:
 
             log.LOG("Error %d: %s" % (e.args[0], e.args[1]))
-	    print ("Error %d: %s" % (e.args[0], e.args[1]))
-	#    raise e
+            print ("Error %d: %s" % (e.args[0], e.args[1]))
+            #    raise e
 
         finally:
 
@@ -64,7 +63,6 @@ class ConMySQL(object):
 
         query = "SELECT * FROM types_list where type REGEXP %s"
         return cls.__getData(query, pattern)
-
 
     @classmethod
     def getWhereTypeAndParent(cls, text, id_parent):
@@ -90,7 +88,6 @@ class ConMySQL(object):
         for row in treeData:
             child = (row['CHILDREN'], row['ID'])
             parent = (row['PARENT'], row['ID_PARENT'])
-
 
             if parent in result.keys():
                 result[parent].append(child)
@@ -127,61 +124,61 @@ class ConMySQL(object):
         return cls.__getData(query, pattern)
 
     @classmethod
-    def getLib(cls, dictPattern={'id':'.*'}, oper='OR', access='ALL'):
+    def getLib(cls, dictPattern={'id': '.*'}, oper='OR', access='ALL'):
     	"""
     Get rows from Library DB
     dictPattern -> dict{column : pattern}
-	example {'id' : '[1-5]'} or {'id' : '[1-5]', ''name' : 'RNC'}
+    example {'id' : '[1-5]'} or {'id' : '[1-5]', ''name' : 'RNC'}
     oper -> str['OR', 'AND']
-	example oper='AND'
-	SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
+    example oper='AND'
+    SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
     access -> str ['All', [$USER]]"""
 
         query = "SELECT * FROM VIEW_WAITING where id_access = %s AND "
 
         tmp = []
-        for (k,v) in dictPattern.items():
+        for (k, v) in dictPattern.items():
             tmp.append(" %s REGEXP '%s' " % (MySQLdb.escape_string(k), MySQLdb.escape_string(str(v))))
         query += oper.join(tmp)
 
         return cls.__getData(query, access)
 
     @classmethod
-    def getLibDefaultDick(cls, dictPattern={'id':['.*']}, oper='OR', access='ALL'):
+    def getLibDefaultDick(cls, dictPattern={'id': ['.*']}, oper='OR', access='ALL'):
         """
     Get rows from Library DB
     dictPattern -> dict{column : pattern}
-	example {'id' : '[1-5]'} or {'id' : '[1-5]', ''name' : 'RNC'}
+    example {'id' : '[1-5]'} or {'id' : '[1-5]', ''name' : 'RNC'}
     oper -> str['OR', 'AND']
-	example oper='AND'
-	SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
+    example oper='AND'
+    SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
     access -> str ['All', [$USER]]"""
 
         query = "SELECT * FROM VIEW_WAITING where id_access = %s AND "
 
         result = []
-        for (k,val) in dictPattern.items():
-	    for v in val:
-	        tmp_query = query + " " + k + " REGEXP %s"
-	        result.extend(cls.__getData(tmp_query, access, v))
+        for (k, val) in dictPattern.items():
+            for v in val:
+                tmp_query = query + " " + k + " REGEXP %s"
+                result.extend(cls.__getData(tmp_query, access, v))
 
         return {x['id']: x for x in result}.values()
 
     @classmethod
-    def getWeit(cls, dictPattern={'id':'.*'}, oper='OR', access='ALL'):
+    def getWeit(cls, dictPattern={'id': '.*'}, oper='OR', access='ALL'):
     	"""
     Get rows from waiting DB
     dictPattern -> dict{column : pattern}
-	example {'id' : '[1-5]'} or {'id' : '[1-5]', ''name' : 'RNC'}
+    example {'id' : '[1-5]'} or {'id' : '[1-5]', ''name' : 'RNC'}
     oper -> str['OR', 'AND']
-	example oper='AND'
-	SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
+    example oper='AND'
+    SQL: query .. where id REGEXP '[1-5]' AND name REGEXP 'RNC'
     access -> str ['All', [$USER]]"""
 
         query = "SELECT * FROM VIEW_WAITING where id_access = %s AND "
 
         tmp = []
-        for (k,v) in dictPattern.items():
+        for (k, v) in dictPattern.items():
             tmp.append(" %s REGEXP '%s' " % (MySQLdb.escape_string(k), MySQLdb.escape_string(v)))
         query += oper.join(tmp)
 
@@ -189,38 +186,36 @@ class ConMySQL(object):
 
     @classmethod
     def getUser(cls, user):
-    	"""Get User from DB"""
+        """Get User from DB"""
 
         query = "SELECT * FROM users_list where user = %s"
         return cls.__getData(query, user)
 
     @classmethod
     def getNews(cls, user):
-    	"""Get News from DB"""
+        """Get News from DB"""
 
         duser = cls.getUser(user)
-	if len(duser) >= 1:
-	    duser = cls.getUser(user)[0]
-	    query = "SELECT * FROM VIEW_WAITING WHERE date_a > '" + duser['last_log'].strftime("%Y-%m-%d %T") + "'"
-	else:
-	    cls.updateUser(user)
-	    query = "SELECT * FROM VIEW_WAITING WHERE date_a < '1970-01-01 12:00:00'"
-
-
+        if len(duser) >= 1:
+            duser = cls.getUser(user)[0]
+            query = "SELECT * FROM VIEW_WAITING WHERE date_a > '" + duser['last_log'].strftime("%Y-%m-%d %T") + "'"
+        else:
+            cls.updateUser(user)
+            query = "SELECT * FROM VIEW_WAITING WHERE date_a < '1970-01-01 12:00:00'"
 
         return cls.__getData(query)
 
     @classmethod
     def getHelp(cls, com='ALL'):
-    	"""Get Help from DB"""
+        """Get Help from DB"""
 
         query = "SELECT name, s_name, description FROM help_list WHERE name = %s OR s_name = %s"
         help = cls.__getData(query, com, com)
 
-	if help:
-	    return help
-	else:
-	    return cls.__getData("SELECT name, s_name, description FROM help_list WHERE name = 'ALL'")
+        if help:
+            return help
+        else:
+            return cls.__getData("SELECT name, s_name, description FROM help_list WHERE name = 'ALL'")
 
     @classmethod
     def setType(cls, name, parent):
@@ -234,7 +229,7 @@ class ConMySQL(object):
 
     @classmethod
     def setUser(cls, user):
-    	"""Add new user"""
+        """Add new user"""
 
         query = "INSERT INTO users_list(user) VALUES(%s)"
         cls.__setData(query, user)
@@ -259,22 +254,22 @@ class ConMySQL(object):
     	"""
     Update row from waiting DB
     dictPattern -> dict{column : string}
-	example {'name' : 'new', 'description' : 'new description'}
+    example {'name' : 'new', 'description' : 'new description'}
     id -> str
     user -> str ($USER)"""
 
         query = "UPDATE waiting_list SET name = %s, id_type = %s, id_access = %s, description = %s, key_list = %s, date_m = NOW(), name_m = %s WHERE id = %s"
 
-        return cls.__setData(query, name, id_type, access, description, key_list.replace(' ',''), user, row_id)
+        return cls.__setData(query, name, id_type, access, description, key_list.replace(' ', ''), user, row_id)
 
     @classmethod
     def updateUser(cls, user):
-    	"""Update user last_login"""
+        """Update user last_login"""
 
-	befor_update = cls.getUser(user)
-	if not befor_update:
-	    cls.setUser(user)
-	    query_add_type="INSERT INTO types_list(type, id_parent) SELECT %s, id_type from types_list where type = 'Users' and id_parent = 1;"
+        befor_update = cls.getUser(user)
+        if not befor_update:
+            cls.setUser(user)
+            query_add_type = "INSERT INTO types_list(type, id_parent) SELECT %s, id_type from types_list where type = 'Users' and id_parent = 1;"
             cls.__setData(query_add_type, user)
         query_last_log = "UPDATE users_list SET last_log = NOW() where user = %s"
 

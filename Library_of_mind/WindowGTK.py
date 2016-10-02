@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import gi
-gi.require_version('Gtk','3.0')
-
-from gi.repository import Gtk as gtk
-from gi.repository import Gdk
 import log
 from MySQL import ConMySQL
 from AddRowWindowGTK import AddRowWindowGTK
 import csv
 import os
 from collections import deque, defaultdict
+
+import gi
+
+from gi.repository import Gtk as gtk
+from gi.repository import Gdk
+
+gi.require_version('Gtk', '3.0')
+
 
 def css():
     css = b"""
@@ -56,9 +59,9 @@ column-header .button{color: white; background: purple;}
     style_provider.load_from_data(css)
 
     gtk.StyleContext.add_provider_for_screen(
-    Gdk.Screen.get_default(),
-    style_provider,
-    gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        Gdk.Screen.get_default(),
+        style_provider,
+        gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
     )
 
 
@@ -86,10 +89,10 @@ class Window():
             with open(self.configData['history_file'], 'wb') as f:
                 f.write("")
 
-	self.getConfig()
+        self.getConfig()
 
-	# Set MySQL IP
-	ConMySQL.ip = self.configData['ip_MySQL']
+        # Set MySQL IP
+        ConMySQL.ip = self.configData['ip_MySQL']
 
         # Parse glade XML
         self.gladefile = os.path.dirname(os.path.abspath(__file__)) + "/glade/MainWindow.glade"
@@ -134,13 +137,13 @@ class Window():
 
         log.LOG("START  setConfig")
 
-	tmp =  dict(filter(lambda x: not x[0].startswith('_'), self.configData.items()))
-	tmp['short'] = ' '.join(tmp['short'])
-	with open(self.configData['lomrc'], 'wb') as csvfile:
-	    writer = csv.DictWriter(csvfile, tmp.keys())
-	    writer.writeheader()
-	    writer.writerow(tmp)
-	self.getConfig()
+        tmp = dict(filter(lambda x: not x[0].startswith('_'), self.configData.items()))
+        tmp['short'] = ' '.join(tmp['short'])
+        with open(self.configData['lomrc'], 'wb') as csvfile:
+            writer = csv.DictWriter(csvfile, tmp.keys())
+            writer.writeheader()
+            writer.writerow(tmp)
+        self.getConfig()
 
         log.LOG("END  setConfig")
 
@@ -148,12 +151,12 @@ class Window():
 
         log.LOG("START  getConfig")
 
-	with open(self.configData['lomrc']) as csvfile:
-	    reader = csv.DictReader(csvfile)
-	    for row in reader:
-	        for k,v in row.items():
-	            self.configData[k] = v
-	self.configData['short'] = self.configData['short'].split()
+        with open(self.configData['lomrc']) as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                for k, v in row.items():
+                    self.configData[k] = v
+        self.configData['short'] = self.configData['short'].split()
 
         log.LOG("END  getConfig")
 
@@ -161,13 +164,12 @@ class Window():
 
         log.LOG("START  initialInfo")
 
-        #get news
+        # get news
         rows = ConMySQL.getNews(self.configData['user'])
 
         if rows:
             self.print_error_message("%d news from last check" % len(rows))
             self.getNews()
-
 
         log.LOG("END  initialInfo")
 
@@ -177,7 +179,7 @@ class Window():
 
         self.window.add_events(Gdk.EventMask.BUTTON_PRESS_MASK)
 
-	self.window.set_gravity(Gdk.Gravity.SOUTH_EAST)
+        self.window.set_gravity(Gdk.Gravity.SOUTH_EAST)
         self.window.set_keep_above(True)
         self.window.set_resizable(False)
         self.window.set_decorated(False)
@@ -195,8 +197,8 @@ class Window():
         x = int(Gdk.Screen.get_default().get_width() * int(self.configData['_x']))
         y = int(Gdk.Screen.get_default().get_height() * int(self.configData['_y']))
 
-        #Set position Left-Button
-        log.LOG("(x,y) = (%s,%s)   (w,h) = (%s,%s)" % (x,y,w,h))
+        # Set position Left-Button
+        log.LOG("(x,y) = (%s,%s)   (w,h) = (%s,%s)" % (x, y, w, h))
         self.window.move(x-w, y-h)
 
         log.LOG("END  __set_position")
@@ -226,14 +228,11 @@ class Window():
             gtk.main_quit()
             self.window.destroy()
 
-
         log.LOG("END __key_function")
-
 
     def historyDown(self):
 
         log.LOG("START historyUp")
-
 
         if self.histpos > 0:
             self.entryCommandLine.set_text(self.history[self.histpos])
@@ -241,18 +240,15 @@ class Window():
 
         log.LOG("END historyUp")
 
-
     def historyUp(self):
 
         log.LOG("START historyDown")
-
 
         if self.histpos < len(self.history) - 1:
             self.entryCommandLine.set_text(self.history[self.histpos])
             self.histpos = self.histpos + 1
 
         log.LOG("END historyDown")
-
 
     def setHisoryFile(self):
 
@@ -271,7 +267,7 @@ class Window():
         log.LOG("START  print_error_message")
 
         md = gtk.MessageDialog(self.window, type=gtk.MessageType.ERROR, buttons=gtk.ButtonsType.OK)
-	md.set_position(gtk.WindowPosition.CENTER_ON_PARENT)
+        md.set_position(gtk.WindowPosition.CENTER_ON_PARENT)
         md.set_markup(text)
         md.run()
         md.destroy()
@@ -284,23 +280,23 @@ class Window():
 
         log.LOG("START entry_dialog")
 
-	dialog = gtk.MessageDialog(self.window, type=gtk.MessageType.QUESTION, buttons=gtk.ButtonsType.OK)
-	dialog.set_position(gtk.WindowPosition.CENTER_ON_PARENT)
-	dialog.set_markup(message)
+        dialog = gtk.MessageDialog(self.window, type=gtk.MessageType.QUESTION, buttons=gtk.ButtonsType.OK)
+        dialog.set_position(gtk.WindowPosition.CENTER_ON_PARENT)
+        dialog.set_markup(message)
 
-	dialogBox = dialog.get_content_area()
-	entry = gtk.Entry()
-	entry.set_size_request(200, 0)
-	dialogBox.pack_end(entry, False, False, 0)
+        dialogBox = dialog.get_content_area()
+        entry = gtk.Entry()
+        entry.set_size_request(200, 0)
+        dialogBox.pack_end(entry, False, False, 0)
 
-	dialog.show_all()
-	response = dialog.run()
-	text = entry.get_text() 
+        dialog.show_all()
+        response = dialog.run()
+        text = entry.get_text()
         dialog.destroy()
-	if (response == gtk.ResponseType.OK) and (text != ''):
-	    return text
-	else:
-	    return None
+        if (response == gtk.ResponseType.OK) and (text != ''):
+            return text
+        else:
+            return None
 
         log.LOG("END entry_dialog")
 
@@ -338,7 +334,7 @@ class Window():
             self.setOption(rest)
         elif command in ['search', 's']:
             self.search(rest)
-        elif command in ['add','a']:
+        elif command in ['add', 'a']:
             self.addParser(rest)
         elif command in ['update', 'u']:
             self.updateRecord(rest)
@@ -359,27 +355,25 @@ class Window():
         elif command.isdigit():
             self.getDigit(int(command))
 
-
         log.LOG("END  parserArgs")
 
     def commonLayout(self):
 
         log.LOG("START  commonLayout")
-	self.labelTitle.set_text("Library Of Mind")
+        self.labelTitle.set_text("Library Of Mind")
 
         self.window.set_size_request(WINDOW_WIDTH, WINDOW_HEIGHT)
 
         self.entryCommandLine.set_text("")
-        widget = self.gridMain.get_child_at(0,1)
-        if widget != None:
+        widget = self.gridMain.get_child_at(0, 1)
+        if widget is not None:
             self.gridMain.remove(widget)
 
-        widget = self.gridMain.get_child_at(0,2)
-        if widget != None:
+        widget = self.gridMain.get_child_at(0, 2)
+        if widget is not None:
             self.gridMain.remove(widget)
 
         self.__set_position()
-
 
         log.LOG("END  commonLayout")
 
@@ -393,9 +387,8 @@ class Window():
         sw.set_size_request(450, 200)
         sw.set_visible(True)
         sw.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.AUTOMATIC)
-        self.gridMain.attach(sw,0,2,1,1)
-        log.LOG("(0,1): %s" % self.gridMain.get_child_at(0,1))
-
+        self.gridMain.attach(sw, 0, 2, 1, 1)
+        log.LOG("(0,1): %s" % self.gridMain.get_child_at(0, 1))
 
         self.labelText = gtk.Label()
         self.labelText.set_markup(escape(text))
@@ -408,7 +401,6 @@ class Window():
 
         self.__set_position()
 
-
         log.LOG("END  labelLayout")
 
     def treeViewLayout(self, model, activatedRow, getSelectedRow, search_col=0):
@@ -418,7 +410,7 @@ class Window():
         """
 
         log.LOG("START  treeViewLayout")
-	self.commonLayout()
+        self.commonLayout()
 
         log.LOG("Create Scroll")
         sw = gtk.ScrolledWindow()
@@ -427,8 +419,8 @@ class Window():
         sw.set_can_focus(True)
         sw.set_visible(True)
         sw.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.AUTOMATIC)
-        self.gridMain.attach(sw,0,1,1,1)
-        log.LOG("(0,1): %s" % self.gridMain.get_child_at(0,1))
+        self.gridMain.attach(sw, 0, 1, 1, 1)
+        log.LOG("(0,1): %s" % self.gridMain.get_child_at(0, 1))
 
         self.treeViewResult = gtk.TreeView()
         self.treeViewResult.set_size_request(450, 200)
@@ -450,28 +442,27 @@ class Window():
     def getSelectedRow(self, widget):
 
         log.LOG("START  getSelectedRow")
-	text_row ="""
+        text_row = """
 <span color="#929287">Title: </span><span>{1}</span>
 <span color="#929287">Name: </span><span>{2}</span>
 <span color="#929287">Description:</span>\n
 <span>{4}</span>\n
 <span color="#929287">Keys: </span><span>{3}</span>
-<span color="#929287">Autor: </span><span weight="bold">{5}</span>\t<span color="#929287">Date: </span><span>{6}</span>
-"""
+<span color="#929287">Autor: </span><span weight="bold">{5}</span>\t<span color="#929287">Date: </span><span>{6}</span> """
+
         selection = widget.get_selection()
         result = selection.get_selected()
 
         if result:
             model, iter = result
-            wid = self.gridMain.get_child_at(0,2)
+            wid = self.gridMain.get_child_at(0, 2)
 
-            if wid != None:
+            if wid is not None:
                 self.gridMain.remove(wid)
             self.labelLayout(text_row.format(*model[iter]))
         self.__set_position(WINDOW_WIDTH, WINDOW_HEIGHT + 200 if self.configData['_size_200'] else 0)
 
-
-	self.labelTitle.set_text("Search --> %s" % model[iter][2])
+        self.labelTitle.set_text("Search --> %s" % model[iter][2])
         log.LOG("END  getSelectedRow")
 
     def getSelectedRowType(self, widget, column, data):
@@ -482,20 +473,21 @@ class Window():
         result = selection.get_selected()
         if result:
             model, iter = result
-	    type_name = str(model.get_value(iter, 0))
-	    type_id = model.get_value(iter, 1)
+            type_name = str(model.get_value(iter, 0))
+            type_id = model.get_value(iter, 1)
 
             typeData = ConMySQL.getTypeByTree()
-	    child = (type_name, type_id)
+            child = (type_name, type_id)
 
             id_type = ["-it", '[[:<:]]' + str(type_id) + '[[:>:]]']
 
             for i in self.getIdFromTreeType(typeData, child):
-	        id_type.extend(["-it", '[[:<:]]' + str(i) + '[[:>:]]'])
+                id_type.extend(["-it", '[[:<:]]' + str(i) + '[[:>:]]'])
             self.commonLayout()
             self.search(id_type)
 
-	self.labelTitle.set_text("Type select --> %s" % type_name)
+            self.labelTitle.set_text("Type select --> %s" % type_name)
+
         log.LOG("END  getSelectedRowType")
 
     def getExpandRow(self, widget):
@@ -505,7 +497,7 @@ class Window():
         result = selection.get_selected()
         if result:
             model, iter = result
-	    path = model.get_path(iter)
+            path = model.get_path(iter)
             widget.expand_to_path(path)
 
         log.LOG("END getExpandRow")
@@ -513,7 +505,7 @@ class Window():
     def getIdFromTreeType(self, typeData, parentName=('LOM', 1)):
 
         log.LOG("START getIdFromTreeType")
-	list_id = []
+        list_id = []
 
         if not typeData.get(parentName):
             return list_id
@@ -523,7 +515,6 @@ class Window():
                 if typeData.get(child):
                     list_id.extend(self.getIdFromTreeType(typeData, child))
         return list_id
-
 
         log.LOG("END getIdFromTreeType")
 
@@ -535,14 +526,14 @@ class Window():
         result = selection.get_selected()
         if result:
             model, iter = result
-	    key_name = str(model.get_value(iter, 0))
+            key_name = str(model.get_value(iter, 0))
 
             id_type = ["-k", '[[:<:]]' + key_name + '[[:>:]]']
             self.commonLayout()
             self.search(id_type)
 
+        self.labelTitle.set_text("Key select --> %s" % key_name)
 
-	self.labelTitle.set_text("Key select --> %s" % key_name)
         log.LOG("END  getSelectedRowKey")
 
     def getSelectedHis(self, widget, column, data):
@@ -555,7 +546,7 @@ class Window():
             model, iter = result
             self.commonLayout()
             self.entryCommandLine.set_text(str(model.get_value(iter, 1)))
-	    self.parserArgs(self.entryCommandLine)
+            self.parserArgs(self.entryCommandLine)
 
         log.LOG("END getSelectedHis")
 
@@ -567,12 +558,13 @@ class Window():
         result = selection.get_selected()
         if result:
             model, iter = result
-	    id_row = model[iter][0]
+            id_row = model[iter][0]
             self.commonLayout()
             gtkWindowUpdateRow = AddRowWindowGTK(self.configData['user'], id_row)
             gtkWindowUpdateRow.main()
 
-	self.labelTitle.set_text("Update select --> %s" % model[iter][1])
+        self.labelTitle.set_text("Update select --> %s" % model[iter][1])
+
         log.LOG("END getSelectedUpdate")
 
     def getHelp(self, com):
@@ -581,7 +573,7 @@ class Window():
 
         if com:
             helpList = ConMySQL.getHelp(' '.join(com))[0]
-	    if helpList['name'] == 'ALL':
+            if helpList['name'] == 'ALL':
                 helpList = '<span color="red">INVALID SYNTAX</span>\n' + helpList['description']
             else:
                 helpList = helpList['description']
@@ -593,18 +585,17 @@ class Window():
             helpList = helpList['description']
             self.labelLayout(helpList)
 
-
-	self.labelTitle.set_text("Help --> %s" % ' '.join(com) or 'All')
+        self.labelTitle.set_text("Help --> %s" % ' '.join(com) or 'All')
         log.LOG("END  getHelp")
 
     def search(self, com):
 
         log.LOG("START  search")
 
-        #helper fun
+        # helper fun
         def checkRow(l, d, n):
 
-            log.LOG("%s %s %s" % (l,d,n))
+            log.LOG("%s %s %s" % (l, d, n))
             t = []
             while not l[0].startswith('-'):
                 t.append(l.pop(0))
@@ -635,7 +626,7 @@ class Window():
                         if k.lower() in ['-id', '-i']:
                             checkRow(com, dPattern, 'id')
 
-                        elif k.lower() in ['-name','-n ']:
+                        elif k.lower() in ['-name', '-n ']:
                             checkRow(com, dPattern, 'name')
 
                         elif k.lower() in ['-type', '-t']:
@@ -655,7 +646,6 @@ class Window():
                     else:
                         return self.print_error_message("Invalid syntax")
 
-
         if dPattern:
             rows = ConMySQL.getLibDefaultDick(dPattern)
         else:
@@ -665,16 +655,14 @@ class Window():
             toadd = [row['id'], row['type'], row['name'], row['key_list'], row['description'], row['name_a'], row['date_a'].strftime("%Y-%m-%d %T")]
             self.component['search'].append(toadd)
 
-
         # Create, TreeView Layout
         self.treeViewLayout(self.component['search'], self.doNothing, self.getSelectedRow, 2)
 
         # create columns
         self.createColumns(self.treeViewResult, self.mapColumnNameToNumber(self.configData['short']))
 
-	self.labelTitle.set_text("Search --> %s" % (' '.join(com) if com else "All"))
+        self.labelTitle.set_text("Search --> %s" % (' '.join(com) if com else "All"))
         log.LOG("END  search")
-
 
     def addRecord(self):
 
@@ -682,25 +670,25 @@ class Window():
         gtkWindowAddRow = AddRowWindowGTK(self.configData['user'])
         gtkWindowAddRow.main()
 
-	self.labelTitle.set_text("Add record")
+        self.labelTitle.set_text("Add record")
         log.LOG("END  addRecord")
 
-    def addParser(self,com):
+    def addParser(self, com):
 
         log.LOG("START addParser")
         if com:
-	    if com[0].startswith('-'):
-	        if com[0] in ['-t', '-type']:
-		    if len(com) == 2:
-		        self.selectNewType(com[1])
-		    else:
-		        self.selectNewType()
-		else:
-	            self.print_error_message("Invalid syntax More in <tt>help add</tt>")
-	    else:
-	        self.print_error_message("Invalid syntax More in <tt>help add</tt>")
-	else:
-	    self.addRecord()
+            if com[0].startswith('-'):
+                if com[0] in ['-t', '-type']:
+                    if len(com) == 2:
+                        self.selectNewType(com[1])
+                    else:
+                        self.selectNewType()
+                else:
+                    self.print_error_message("Invalid syntax More in <tt>help add</tt>")
+            else:
+                self.print_error_message("Invalid syntax More in <tt>help add</tt>")
+        else:
+            self.addRecord()
 
         log.LOG("END addParser")
 
@@ -722,16 +710,16 @@ class Window():
                 self.addRowToTreeView(typeData, child, parent)
 
         else:
-        # Show all type
+            # Show all type
             self.addRowToTreeView(typeData)
 
         # Create, TreeView Layout
-        self.treeViewLayout(self.component['type'], self.addNewTypeToSelected, self.getExpandRow)
+        self.treeViewLayout(self.component['type'], self.addNewTypeToSelected, self.doNothing)
 
         # create columns
         self.createColumns(self.treeViewResult, [(0, 'Type')])
 
-	self.labelTitle.set_text("Add new type. Please select parent type")
+        self.labelTitle.set_text("Add new type. Please select parent type")
 
         log.LOG("END selectNewType")
 
@@ -743,16 +731,16 @@ class Window():
         result = selection.get_selected()
         if result:
             model, iter = result
-	    type_name = str(model.get_value(iter, 0))
-	    type_id = model.get_value(iter, 1)
+            type_name = str(model.get_value(iter, 0))
+            type_id = model.get_value(iter, 1)
 
             new_type = self.entry_dialog("Please entry new type to <tt>%s</tt>" % type_name)
-	    if new_type:
-	        ConMySQL.setType(new_type, type_id)
+            if new_type:
+                ConMySQL.setType(new_type, type_id)
                 self.commonLayout()
-	        self.labelTitle.set_text("Add new type '%s' to '%s'" % (new_type, type_name))
-	    else:
-	        self.print_error_message("Name is empty More <tt>help add</tt>")
+                self.labelTitle.set_text("Add new type '%s' to '%s'" % (new_type, type_name))
+            else:
+                self.print_error_message("Name is empty More <tt>help add</tt>")
 
         log.LOG("END addNewTypeToSelected")
 
@@ -777,7 +765,7 @@ class Window():
                 self.addRowToTreeView(typeData, child, parent)
 
         else:
-        # Show all type
+            # Show all type
             self.addRowToTreeView(typeData)
 
         # Create, TreeView Layout
@@ -786,12 +774,10 @@ class Window():
         # create columns
         self.createColumns(self.treeViewResult, [(0, 'Type')])
 
-
-	self.labelTitle.set_text("Type --> %s" % (' '.join(com) if com else "All"))
+        self.labelTitle.set_text("Type --> %s" % (' '.join(com) if com else "All"))
         log.LOG("END getType")
 
         log.LOG("END  getTypeTree")
-
 
     def updateRecord(self, com):
 
@@ -817,14 +803,13 @@ class Window():
             toadd = [row['id'], row['type'], row['name'], row['key_list'], row['description'], row['name_a'], row['date_a'].strftime("%Y-%m-%d %T")]
             self.component['search'].append(toadd)
 
-
         # Create, TreeView Layout
         self.treeViewLayout(self.component['search'], self.getSelectedUpdate, self.doNothing, 2)
 
         # create columns
         self.createColumns(self.treeViewResult, self.mapColumnNameToNumber(self.configData['short']))
 
-	self.labelTitle.set_text("Update --> %s" % (' '.join(com) if com else "All"))
+        self.labelTitle.set_text("Update --> %s" % (' '.join(com) if com else "All"))
         log.LOG("END updateRecord")
 
 
@@ -850,10 +835,9 @@ class Window():
             return
         else:
             for child in typeData[parentName]:
-                newParent = self.component['type'].append(parent, [child[0],child[1]])
+                newParent = self.component['type'].append(parent, [child[0], child[1]])
                 if typeData.get(child):
                     self.addRowToTreeView(typeData, child, newParent)
-
 
         log.LOG("END  addRowToTreeView")
 
@@ -872,29 +856,27 @@ class Window():
         for key in keys:
             self.component['keys'].append([key['key_name']])
 
-
         # Create, TreeView Layout
         self.treeViewLayout(self.component['keys'], self.getSelectedRowKey, self.doNothing)
 
         # create columns
         self.createColumns(self.treeViewResult, [(0, 'keys')])
 
-	self.labelTitle.set_text("Keys --> %s" % (' '.join(com) if com else "All"))
+        self.labelTitle.set_text("Keys --> %s" % (' '.join(com) if com else "All"))
         log.LOG("END  getKeysList")
 
     def mapColumnNameToNumber(self, nameList):
 
         mapNumber = {
-		'ID' : 0,
-		'Title' : 1,
-		'Name' : 2,
-		'Keys' : 3,
-		'Description' : 4,
-		'name_a' : 5,
-		'data_a' : 6}
+            'ID': 0,
+            'Title': 1,
+            'Name': 2,
+            'Keys': 3,
+            'Description': 4,
+            'name_a': 5,
+            'data_a': 6}
 
-
-	return [(mapNumber[x], x) for x in nameList if x in mapNumber.keys()]
+        return [(mapNumber[x], x) for x in nameList if x in mapNumber.keys()]
 
     def getNews(self):
 
@@ -916,7 +898,7 @@ class Window():
         # create columns
         self.createColumns(self.treeViewResult, self.mapColumnNameToNumber(self.configData['short']))
 
-	self.labelTitle.set_text("News")
+        self.labelTitle.set_text("News")
         log.LOG("END  getNews")
 
     def getDigit(self):
@@ -936,14 +918,13 @@ class Window():
         for row in enumerate(self.history):
             self.component['history'].append(row)
 
-
         # Create, TreeView Layout
         self.treeViewLayout(self.component['history'], self.getSelectedHis, self.doNothing, 1)
 
         # create columns
-        self.createColumns(self.treeViewResult, [(0, 'ID'),(1, 'History')])
+        self.createColumns(self.treeViewResult, [(0, 'ID'), (1, 'History')])
 
-	self.labelTitle.set_text("History")
+        self.labelTitle.set_text("History")
         log.LOG("END  getDigit")
 
     def setOption(self, com):
@@ -956,7 +937,7 @@ class Window():
             self.getConfig()
             message = ""
             for k, v in self.configData.items():
-	        if not k.startswith('_'):
+                if not k.startswith('_'):
                     message += "%s = %s\n" % (k, v)
             self.labelLayout(message)
         else:
@@ -964,30 +945,31 @@ class Window():
         self.setConfig()
 
         log.LOG("END setOption")
-    
+
     def openWebBrowser(self, com):
         log.LOG("START openWebBrowser")
-	import webbrowser
+        import webbrowser
 
         browser = webbrowser.BackgroundBrowser("gnome-open")
-	
-	if len(com) >= 2 and com[0].startswith('-'):
-	    option = com.pop(0)
-	    if option in ['-s']:
-	        url = "http://stackoverflow.com/search?q=" + '+'.join(com)
-	    elif option in ['-u']:
-	        url = "http://unix.stackexchange.com/search?q=" + '+'.join(com)
-	    elif option in ['-g']:
-	        url = "https://www.google.pl/search?q=" + '+'.join(com)
-	    else:
-	        return self.print_error_message('INVALID SYNTAX')
 
-	    browser.open(url)
+        if len(com) >= 2 and com[0].startswith('-'):
+            option = com.pop(0)
+            if option in ['-s']:
+                url = "http://stackoverflow.com/search?q=" + '+'.join(com)
+            elif option in ['-u']:
+                url = "http://unix.stackexchange.com/search?q=" + '+'.join(com)
+            elif option in ['-g']:
+                url = "https://www.google.pl/search?q=" + '+'.join(com)
+            else:
+                return self.print_error_message('INVALID SYNTAX')
 
-	else:
+            browser.open(url)
+
+        else:
             self.print_error_message('INVALID SYNTAX')
 
         log.LOG("END openWebBrowser")
+
 
 def escape(s):
     "escape html markup"
@@ -997,6 +979,8 @@ def escape(s):
         s = s.replace("\>", "&gt;")
 
     return s
+
+
 def escapePattern(s):
     "escape html markup"
     if isinstance(s, str):

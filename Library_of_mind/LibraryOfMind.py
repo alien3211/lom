@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # "LibraryOfMind" is distributed under GNU GPLv3+, WITHOUT ANY WARRANTY.
 # Copyright(c) 2015: Alan Tetich <alan.tetich@gmail.com>
 
@@ -25,6 +25,7 @@ glyy = 1
 oneShot = False
 size_200 = False
 
+
 def usage(res):
     out = ("""Usage:
   ./Library_of_mind.py <OPTS>
@@ -47,14 +48,14 @@ def usage(res):
   left button window  '0:1'
   rigth button window '1:1'
 
-  2 window:
-  	firts window
+  window:
+    firts window
   left top window     '0:0'
   right top window    '0.5:0'
   left button window  '0:1'
   rigth button window '0.5:1'
 
-  	secend window
+    secend window
   left top window     '0:0'
   right top window    '1:0'
   left button window  '0:1'
@@ -91,8 +92,8 @@ def parseArgs():
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hk:m:dos",
-                                   ["help","key=", "move=", "debug", "one_shot"])
-    except getopt.GetoptError, err:
+                                   ["help", "key=", "move=", "debug", "one_shot"])
+    except getopt.GetoptError:
         usage(2)
 
     for opt, arg in opts:
@@ -111,15 +112,16 @@ def parseArgs():
             size_200 = True
 
 
-def startWindow(modifiers, keys,):
-    if (modifiers[glkey] == True) and (keys == glchar):
+def startWindow(modifiers, keys):
+    if (modifiers[glkey] is True) and (keys == glchar):
         runThreadWindow()
 
+
 def runThreadWindow():
-    args= {
-           '_x' : glxx,
-           '_y' : glyy,
-	   '_size_200' : size_200}
+    args = {
+           '_x': glxx,
+           '_y': glyy,
+    '_size_200': size_200}
 
     log.LOG("BEGIN Thread")
     thread = ThreadWindow(args)
@@ -136,17 +138,15 @@ def main():
     if oneShot:
         runThreadWindow()
     else:
-        sleep_interval=.005
+        sleep_interval = .005
         while True:
             sleep(sleep_interval)
             changed, modifiers, keys = fetch_keys()
             if changed:
                 startWindow(modifiers, keys)
 
-
-
 if __name__ == '__main__':
-    pid = checkProc(['python.*LibraryOfMind.py']) 
+    pid = checkProc(['python.*LibraryOfMind.py'])
     if pid >= 2:
       print("You have already started LibraryOfMind")
       exit(1)
